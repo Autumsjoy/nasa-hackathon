@@ -1,10 +1,6 @@
-from flask import Flask, request, jsonify, render_template
-import os
-import logging
-import base64
-from PIL import Image
-import io
+from flask import Flask, render_template, jsonify
 import numpy as np
+import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -12,26 +8,14 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
-# Add CORS headers
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-    return response
-
-# Urban Planning Prediction Model
 class UrbanPlanningPredictor:
     def __init__(self):
         self.feature_names = ['vegetation', 'built_area', 'water', 'population']
     
     def predict_temperature(self, features):
-        """Predict urban temperature based on landscape features"""
         vegetation, built_area, water, population = features
         
-        # Physics-based calculations
         base_temp = 22.0
-        
         temperature_effect = (
             -8.0 * vegetation +
             10.0 * built_area +
@@ -54,7 +38,6 @@ class UrbanPlanningPredictor:
     def analyze_urban_health(self, temperature, features):
         vegetation, built_area, water, population = features
         
-        # Calculate health score
         temp_score = max(0, 100 - abs(temperature - 22) * 4)
         veg_score = min(100, vegetation * 200)
         water_score = min(100, water * 300)
@@ -62,7 +45,6 @@ class UrbanPlanningPredictor:
         
         health_score = (temp_score * 0.4 + veg_score * 0.3 + water_score * 0.2 + built_score * 0.1)
         
-        # Generate recommendations
         recommendations = []
         
         if vegetation < 0.15:
@@ -89,222 +71,211 @@ class UrbanPlanningPredictor:
             "risk_level": risk_level
         }
 
-# Global predictor instance
 predictor = UrbanPlanningPredictor()
 
-# City data
-CITY_DATA = {
-    'Bhopal': {
-        'problems': [
-            {'id': 1, 'problem': 'Water Pollution', 'suggestion': 'Install water treatment plants', 'severity': 'high', 'coordinates': [23.25, 77.41]},
-            {'id': 2, 'problem': 'Waste Management', 'suggestion': 'Improve segregation and recycling', 'severity': 'medium', 'coordinates': [23.26, 77.43]},
-            {'id': 3, 'problem': 'Air Quality', 'suggestion': 'Promote public transportation', 'severity': 'high', 'coordinates': [23.24, 77.42]},
-            {'id': 4, 'problem': 'Urban Heat Island', 'suggestion': 'Increase green cover', 'severity': 'medium', 'coordinates': [23.27, 77.40]}
-        ],
-        'center_coordinates': [23.2599, 77.4126],
-        'temperature': 32.5
-    },
-    'Delhi': {
-        'problems': [
-            {'id': 1, 'problem': 'Air Pollution', 'suggestion': 'Strict emission controls', 'severity': 'very high', 'coordinates': [28.61, 77.20]},
-            {'id': 2, 'problem': 'Traffic Congestion', 'suggestion': 'Develop metro infrastructure', 'severity': 'high', 'coordinates': [28.62, 77.22]}
-        ],
-        'center_coordinates': [28.6139, 77.2090],
-        'temperature': 35.2
-    },
-    'Mumbai': {
-        'problems': [
-            {'id': 1, 'problem': 'Flooding', 'suggestion': 'Improve drainage systems', 'severity': 'high', 'coordinates': [19.07, 72.87]},
-            {'id': 2, 'problem': 'Overpopulation', 'suggestion': 'Develop satellite cities', 'severity': 'medium', 'coordinates': [19.08, 72.88]}
-        ],
-        'center_coordinates': [19.0760, 72.8777],
-        'temperature': 33.8
-    }
-}
-
-# Urban area configurations
-URBAN_LAYERS = {
-    'residential': {'vegetation': 0.25, 'built_area': 0.45, 'water': 0.08, 'population': 6000},
-    'commercial': {'vegetation': 0.10, 'built_area': 0.75, 'water': 0.03, 'population': 8000},
-    'industrial': {'vegetation': 0.08, 'built_area': 0.80, 'water': 0.05, 'population': 3000},
-    'mixed_use': {'vegetation': 0.20, 'built_area': 0.60, 'water': 0.06, 'population': 7000},
-    'green_space': {'vegetation': 0.70, 'built_area': 0.10, 'water': 0.15, 'population': 1000},
-    'water_body': {'vegetation': 0.05, 'built_area': 0.02, 'water': 0.90, 'population': 500}
+# Bhopal-specific data
+BHOPAL_DATA = {
+    "name": "Bhopal",
+    "population": "2.5 million",
+    "area": "285 km²",
+    "temperature_range": "15°C - 40°C",
+    "current_temperature": 32.5,
+    "center_coordinates": [23.2599, 77.4126],
+    
+    "urban_areas": [
+        {
+            "name": "New Bhopal (Arera Colony)",
+            "coordinates": [23.2456, 77.4037],
+            "type": "residential",
+            "vegetation": 0.30,
+            "built_area": 0.45,
+            "water": 0.08,
+            "population_density": 5500,
+            "temperature": 30.2,
+            "concerns": ["Good green cover", "Moderate density", "Well planned"],
+            "color": "#4ECDC4"
+        },
+        {
+            "name": "Old Bhopal",
+            "coordinates": [23.2650, 77.4030],
+            "type": "mixed_use",
+            "vegetation": 0.15,
+            "built_area": 0.70,
+            "water": 0.03,
+            "population_density": 12000,
+            "temperature": 35.8,
+            "concerns": ["High density", "Low green cover", "Traffic congestion", "Air pollution"],
+            "color": "#FF6B6B"
+        },
+        {
+            "name": "MP Nagar (Commercial)",
+            "coordinates": [23.2350, 77.4150],
+            "type": "commercial",
+            "vegetation": 0.10,
+            "built_area": 0.75,
+            "water": 0.02,
+            "population_density": 8000,
+            "temperature": 34.5,
+            "concerns": ["Urban heat island", "High traffic", "Low vegetation", "Parking issues"],
+            "color": "#FFA726"
+        },
+        {
+            "name": "Shahpura Lake Area",
+            "coordinates": [23.2286, 77.4382],
+            "type": "green_space",
+            "vegetation": 0.60,
+            "built_area": 0.20,
+            "water": 0.15,
+            "population_density": 3000,
+            "temperature": 28.5,
+            "concerns": ["Water pollution", "Encroachment", "Maintenance needed"],
+            "color": "#66BB6A"
+        },
+        {
+            "name": "Bhopal Railway Station",
+            "coordinates": [23.2696, 77.4350],
+            "type": "industrial",
+            "vegetation": 0.08,
+            "built_area": 0.80,
+            "water": 0.04,
+            "population_density": 6000,
+            "temperature": 36.2,
+            "concerns": ["Air pollution", "Noise pollution", "Traffic congestion", "Waste management"],
+            "color": "#6C63FF"
+        },
+        {
+            "name": "Bhadbhada Road (Industrial)",
+            "coordinates": [23.2200, 77.4250],
+            "type": "industrial",
+            "vegetation": 0.05,
+            "built_area": 0.85,
+            "water": 0.03,
+            "population_density": 4000,
+            "temperature": 37.1,
+            "concerns": ["Industrial pollution", "Low green cover", "Water contamination risk"],
+            "color": "#9575CD"
+        }
+    ],
+    
+    "major_problems": [
+        {
+            "id": 1,
+            "problem": "Water Pollution in Upper Lake",
+            "severity": "high",
+            "coordinates": [23.2583, 77.4125],
+            "description": "Contamination from urban runoff and industrial waste",
+            "impact": "Affects drinking water supply and aquatic life",
+            "solutions": ["Install water treatment plants", "Prevent sewage discharge", "Create buffer zones"]
+        },
+        {
+            "id": 2,
+            "problem": "Urban Heat Island Effect",
+            "severity": "high",
+            "coordinates": [23.2550, 77.4080],
+            "description": "Temperature 5-7°C higher than surrounding rural areas",
+            "impact": "Increased energy consumption, health risks",
+            "solutions": ["Increase green cover", "Use cool roofing materials", "Create urban forests"]
+        },
+        {
+            "id": 3,
+            "problem": "Traffic Congestion in City Center",
+            "severity": "medium",
+            "coordinates": [23.2599, 77.4126],
+            "description": "Peak hour traffic jams affecting mobility",
+            "impact": "Air pollution, time loss, economic impact",
+            "solutions": ["Improve public transport", "Develop bypass roads", "Promote cycling"]
+        },
+        {
+            "id": 4,
+            "problem": "Waste Management Issues",
+            "severity": "medium",
+            "coordinates": [23.2500, 77.4200],
+            "description": "Inefficient waste collection and disposal systems",
+            "impact": "Health hazards, environmental pollution",
+            "solutions": ["Improve segregation systems", "Increase recycling", "Public awareness campaigns"]
+        },
+        {
+            "id": 5,
+            "problem": "Air Quality Deterioration",
+            "severity": "high",
+            "coordinates": [23.2450, 77.4150],
+            "description": "PM2.5 and PM10 levels exceeding safe limits",
+            "impact": "Respiratory diseases, environmental damage",
+            "solutions": ["Strict emission controls", "Promote electric vehicles", "Industrial regulations"]
+        },
+        {
+            "id": 6,
+            "problem": "Groundwater Depletion",
+            "severity": "medium",
+            "coordinates": [23.2400, 77.4100],
+            "description": "Over-extraction leading to falling water tables",
+            "impact": "Water scarcity, land subsidence risk",
+            "solutions": ["Rainwater harvesting", "Water conservation", "Artificial recharge"]
+        }
+    ],
+    
+    "heatmap_data": [
+        {"lat": 23.2456, "lng": 77.4037, "intensity": 0.4, "type": "residential", "temperature": 30.2},
+        {"lat": 23.2650, "lng": 77.4030, "intensity": 0.8, "type": "mixed_use", "temperature": 35.8},
+        {"lat": 23.2350, "lng": 77.4150, "intensity": 0.7, "type": "commercial", "temperature": 34.5},
+        {"lat": 23.2286, "lng": 77.4382, "intensity": 0.2, "type": "green_space", "temperature": 28.5},
+        {"lat": 23.2696, "lng": 77.4350, "intensity": 0.9, "type": "industrial", "temperature": 36.2},
+        {"lat": 23.2200, "lng": 77.4250, "intensity": 1.0, "type": "industrial", "temperature": 37.1}
+    ]
 }
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html', bhopal_data=BHOPAL_DATA)
 
-@app.route('/api/analyze-location', methods=['POST'])
-def analyze_location():
-    try:
-        data = request.get_json()
-        lat = data.get('lat', 23.2599)
-        lng = data.get('lng', 77.4126)
-        area_type = data.get('area_type', 'auto_detect')
-        
-        # Auto-detect area type or use specified one
-        if area_type == 'auto_detect':
-            area_type = 'residential'  # Simple detection for demo
-            
-        base_values = URBAN_LAYERS.get(area_type, URBAN_LAYERS['residential']).copy()
-        
-        # Add some variation
-        for key in base_values:
-            if key != 'population':
-                base_values[key] = max(0.01, min(0.99, base_values[key] + np.random.uniform(-0.05, 0.05)))
-            else:
-                base_values[key] = max(1000, base_values[key] + np.random.uniform(-1000, 1000))
-        
-        analysis = {
-            'area_type': area_type,
-            'coordinates': [lat, lng],
-            'vegetation': round(base_values['vegetation'], 3),
-            'built_area': round(base_values['built_area'], 3),
-            'water': round(base_values['water'], 3),
-            'population': int(base_values['population']),
-            'confidence': round(np.random.uniform(0.7, 0.95), 2)
-        }
-        
-        suggestions = generate_area_suggestions(analysis)
-        
-        return jsonify({
-            'success': True,
-            'analysis': analysis,
-            'suggestions': suggestions
-        })
-        
-    except Exception as e:
-        logger.error(f"Location analysis error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-def generate_area_suggestions(analysis):
-    suggestions = []
-    vegetation = analysis['vegetation']
-    built_area = analysis['built_area']
-    area_type = analysis['area_type']
+@app.route('/api/analyze-area/<area_name>')
+def analyze_area(area_name):
+    area = next((a for a in BHOPAL_DATA["urban_areas"] if a["name"] == area_name), None)
+    if not area:
+        return jsonify({"success": False, "error": "Area not found"})
     
-    if vegetation < 0.2:
-        suggestions.append("🌳 Increase green spaces to reduce heat island effect")
-    if built_area > 0.6:
-        suggestions.append("🏗️ Optimize building density for better ventilation")
-    if area_type == 'commercial' and vegetation < 0.15:
-        suggestions.append("🌿 Add green roofs and vertical gardens")
-    
-    return suggestions
-
-@app.route('/api/urban-layers')
-def get_urban_layers():
-    return jsonify({
-        'success': True,
-        'layers': URBAN_LAYERS,
-        'cities': list(CITY_DATA.keys())
-    })
-
-@app.route('/api/analyze-photo', methods=['POST'])
-def analyze_photo():
-    try:
-        data = request.get_json()
-        if not data or 'image' not in data:
-            return jsonify({'success': False, 'error': 'No image provided'}), 400
-        
-        image_data = data['image'].split(',')[1]
-        image_bytes = base64.b64decode(image_data)
-        
-        # Simple image analysis
-        image = Image.open(io.BytesIO(image_bytes))
-        width, height = image.size
-        
-        # Mock analysis for demo
-        analysis = {
-            'green_cover': round(np.random.uniform(10, 40), 1),
-            'built_area': round(np.random.uniform(30, 70), 1),
-            'water_cover': round(np.random.uniform(2, 10), 1),
-            'image_size': f"{width}x{height}"
-        }
-        
-        suggestions = []
-        if analysis['green_cover'] < 20:
-            suggestions.append("🌳 Low green cover detected - consider planting more trees")
-        if analysis['built_area'] > 60:
-            suggestions.append("🏢 High urbanization - recommend green infrastructure")
-        
-        return jsonify({
-            'success': True,
-            'analysis': analysis,
-            'suggestions': suggestions
-        })
-        
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/city-data/<city_name>')
-def get_city_data(city_name):
-    city = CITY_DATA.get(city_name)
-    if not city:
-        return jsonify({'success': False, 'error': 'City not found'}), 404
+    features = [area["vegetation"], area["built_area"], area["water"], area["population_density"]]
+    temperature = predictor.predict_temperature(features)
+    importance = predictor.get_feature_importance()
+    health_analysis = predictor.analyze_urban_health(temperature, features)
     
     return jsonify({
-        'success': True,
-        'city': city_name,
-        'data': city
+        "success": True,
+        "area": area,
+        "prediction": temperature,
+        "feature_importance": importance,
+        "health_analysis": health_analysis,
+        "interpretation": get_temperature_interpretation(temperature)
     })
 
-@app.route('/api/heatmap-data')
-def get_heatmap_data():
-    heatmap_points = []
-    
-    for city_name, data in CITY_DATA.items():
-        heatmap_points.append({
-            'lat': data['center_coordinates'][0],
-            'lng': data['center_coordinates'][1],
-            'intensity': data['temperature'] / 40,
-            'city': city_name,
-            'temperature': data['temperature']
-        })
-        
-        for problem in data['problems']:
-            heatmap_points.append({
-                'lat': problem['coordinates'][0],
-                'lng': problem['coordinates'][1],
-                'intensity': 0.7 if problem['severity'] == 'high' else 0.4,
-                'problem': problem['problem'],
-                'severity': problem['severity']
-            })
-    
-    return jsonify({
-        'success': True,
-        'heatmap_data': heatmap_points
-    })
+@app.route('/api/bhopal-data')
+def get_bhopal_data():
+    return jsonify({"success": True, "data": BHOPAL_DATA})
 
 @app.route('/api/predict', methods=['POST'])
 def predict():
     try:
-        data = request.get_json()
-        vegetation = float(data.get('vegetation', 0.25))
-        built_area = float(data.get('built_area', 0.45))
-        water = float(data.get('water', 0.08))
-        population = float(data.get('population', 6000))
+        data = {
+            "vegetation": 0.25,
+            "built_area": 0.45, 
+            "water": 0.08,
+            "population": 6000
+        }
         
-        features = [vegetation, built_area, water, population]
+        features = [data["vegetation"], data["built_area"], data["water"], data["population"]]
         temperature = predictor.predict_temperature(features)
         importance = predictor.get_feature_importance()
         health_analysis = predictor.analyze_urban_health(temperature, features)
         
-        interpretation = get_temperature_interpretation(temperature)
-        
         return jsonify({
-            'success': True,
-            'prediction': temperature,
-            'feature_importance': importance,
-            'health_analysis': health_analysis,
-            'interpretation': interpretation
+            "success": True,
+            "prediction": temperature,
+            "feature_importance": importance,
+            "health_analysis": health_analysis,
+            "interpretation": get_temperature_interpretation(temperature)
         })
-        
     except Exception as e:
-        logger.error(f"Prediction error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({"success": False, "error": str(e)})
 
 def get_temperature_interpretation(temp):
     if temp < 24:
@@ -316,18 +287,7 @@ def get_temperature_interpretation(temp):
     else:
         return "Hot - Critical intervention needed"
 
-@app.route('/api/health')
-def health_check():
-    return jsonify({'status': 'healthy', 'service': 'NASA Urban Planner'})
-
-@app.route('/api/model-info')
-def model_info():
-    return jsonify({
-        'model_name': 'NASA Urban Temperature Predictor',
-        'features': predictor.feature_names
-    })
-
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 10000))
-    logger.info(f"🚀 NASA Urban Planner starting on http://localhost:{port}")
+    port = 10000
+    logger.info(f"🚀 Bhopal Urban Planning Dashboard starting on http://localhost:{port}")
     app.run(host='0.0.0.0', port=port, debug=False)

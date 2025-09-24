@@ -1,180 +1,153 @@
-let selectionMap = null;
-let currentMarker = null;
-let currentAnalysis = null;
+let bhopalMap = null;
+let currentArea = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeMap();
-    setupEventListeners();
+    initializeEventListeners();
 });
 
 function initializeMap() {
-    selectionMap = L.map('selection-map').setView([23.2599, 77.4126], 6);
+    // Initialize map centered on Bhopal
+    bhopalMap = L.map('bhopal-map').setView([23.2599, 77.4126], 12);
     
+    // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
-    }).addTo(selectionMap);
+    }).addTo(bhopalMap);
 
-    selectionMap.on('click', function(e) {
-        analyzeMapLocation(e.latlng.lat, e.latlng.lng);
+    // Add Bhopal urban areas to map
+    addUrbanAreasToMap();
+}
+
+function addUrbanAreasToMap() {
+    // This would be populated from the backend data
+    const urbanAreas = [
+        {name: "New Bhopal", coords: [23.2456, 77.4037], type: "residential", color: "#4ECDC4"},
+        {name: "Old Bhopal", coords: [23.2650, 77.4030], type: "mixed_use", color: "#FF6B6B"},
+        {name: "MP Nagar", coords: [23.2350, 77.4150], type: "commercial", color: "#FFA726"},
+        {name: "Shahpura Lake", coords: [23.2286, 77.4382], type: "green_space", color: "#66BB6A"},
+        {name: "Railway Station", coords: [23.2696, 77.4350], type: "industrial", color: "#6C63FF"},
+        {name: "Bhadbhada Road", coords: [23.2200, 77.4250], type: "industrial", color: "#9575CD"}
+    ];
+
+    urbanAreas.forEach(area => {
+        L.circleMarker(area.coords, {
+            color: area.color,
+            fillColor: area.color,
+            fillOpacity: 0.7,
+            radius: 10
+        }).addTo(bhopalMap)
+        .bindPopup(`
+            <strong>${area.name}</strong><br>
+            Type: ${area.type.replace('_', ' ').toUpperCase()}<br>
+            <button onclick="analyzeArea('${area.name}')">Analyze Area</button>
+        `);
     });
 }
 
-function setupEventListeners() {
-    document.getElementById('citySelect').addEventListener('change', function() {
-        const city = this.value;
-        if (city) navigateToCity(city);
-    });
-
-    document.getElementById('photoUpload').addEventListener('change', handlePhotoUpload);
-}
-
-async function analyzeMapLocation(lat, lng) {
-    const areaType = document.getElementById('areaTypeSelect').value;
-    
-    showAnalysisLoading(true);
-
-    try {
-        const response = await fetch('/api/analyze-location', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ lat, lng, area_type: areaType })
+function initializeEventListeners() {
+    // Add click listeners to area cards
+    document.querySelectorAll('.area-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const areaName = this.getAttribute('data-area');
+            analyzeArea(areaName);
         });
+    });
+}
 
+async function analyzeArea(areaName) {
+    // Show loading state
+    showAnalysisLoading(true);
+    
+    try {
+        const response = await fetch(`/api/analyze-area/${encodeURIComponent(areaName)}`);
         const data = await response.json();
         
         if (data.success) {
-            displayLocationAnalysis(data.analysis, data.suggestions);
-            addLocationMarker(lat, lng, data.analysis.area_type);
-            currentAnalysis = data.analysis;
+            displayAnalysisResults(data);
+            currentArea = data.area;
+            
+            // Center map on selected area
+            if (data.area.coordinates) {
+                bhopalMap.setView(data.area.coordinates, 14);
+            }
         } else {
             throw new Error(data.error);
         }
     } catch (error) {
+        console.error('Analysis error:', error);
         alert('Analysis failed: ' + error.message);
     } finally {
         showAnalysisLoading(false);
     }
 }
 
-function addLocationMarker(lat, lng, areaType) {
-    if (currentMarker) {
-        selectionMap.removeLayer(currentMarker);
-    }
-
-    currentMarker = L.marker([lat, lng]).addTo(selectionMap)
-        .bindPopup(`<b>${areaType.toUpperCase()}</b><br>Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`)
-        .openPopup();
-}
-
-function displayLocationAnalysis(analysis, suggestions) {
-    const analysisDiv = document.getElementById('location-analysis');
-    analysisDiv.classList.remove('hidden');
-
-    document.getElementById('analyzed-area-type').textContent = analysis.area_type.toUpperCase();
-    document.getElementById('analyzed-vegetation').textContent = (analysis.vegetation * 100).toFixed(1) + '%';
-    document.getElementById('analyzed-built-area').textContent = (analysis.built_area * 100).toFixed(1) + '%';
-    document.getElementById('analyzed-water').textContent = (analysis.water * 100).toFixed(1) + '%';
-    document.getElementById('analyzed-population').textContent = analysis.population.toLocaleString() + '/km²';
-    document.getElementById('analysis-confidence').textContent = (analysis.confidence * 100).toFixed(0) + '% confidence';
-
-    const suggestionsDiv = document.getElementById('area-suggestions');
-    suggestionsDiv.innerHTML = suggestions.map(s => `<div class="suggestion">${s}</div>`).join('');
+function displayAnalysisResults(data) {
+    const resultsDiv = document.getElementById('analysis-results');
+    const placeholder = document.querySelector('.placeholder');
+    
+    placeholder.classList.add('hidden');
+    resultsDiv.classList.remove('hidden');
+    
+    // Update temperature display
+    document.getElementById('predicted-temp').textContent = data.prediction + '°C';
+    document.getElementById('temp-interpretation').textContent = data.interpretation;
+    
+    // Update health score
+    document.getElementById('health-score').textContent = data.health_analysis.health_score;
+    
+    // Update risk level
+    const riskLevelElement = document.getElementById('risk-level');
+    riskLevelElement.textContent = data.health_analysis.risk_level.toUpperCase();
+    riskLevelElement.className = 'risk-' + data.health_analysis.risk_level;
+    
+    // Update recommendations
+    const recommendationsList = document.getElementById('recommendations-list');
+    recommendationsList.innerHTML = data.health_analysis.recommendations
+        .map(rec => `<div class="recommendation-item">${rec}</div>`)
+        .join('');
 }
 
 function showAnalysisLoading(show) {
-    const instruction = document.querySelector('.click-instruction');
-    instruction.textContent = show ? '🔍 Analyzing location...' : '📍 Click anywhere on the map to analyze urban configuration';
+    const resultsContainer = document.getElementById('results-container');
+    if (show) {
+        resultsContainer.innerHTML = '<div class="placeholder"><p>🔍 Analyzing area...</p></div>';
+    }
 }
 
-async function predictFromMapAnalysis() {
-    if (!currentAnalysis) {
-        alert('Please analyze a location first!');
-        return;
-    }
-
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.innerHTML = '<p>Predicting temperature impact...</p>';
-
-    try {
-        const response = await fetch('/api/predict', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(currentAnalysis)
+// Add some interactive effects
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to area cards
+    const areaCards = document.querySelectorAll('.area-card');
+    areaCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
         });
-
-        const data = await response.json();
         
-        if (data.success) {
-            displayResults(data);
-        } else {
-            throw new Error(data.error);
-        }
-    } catch (error) {
-        alert('Prediction failed: ' + error.message);
-    }
-}
-
-function displayResults(data) {
-    document.getElementById('results').innerHTML = `
-        <h3>🌡️ ${data.prediction}°C</h3>
-        <p>${data.interpretation}</p>
-    `;
-
-    document.getElementById('healthScore').innerHTML = `
-        <h4>🏥 Urban Health Score: ${data.health_analysis.health_score}/100</h4>
-        <p>Risk Level: ${data.health_analysis.risk_level}</p>
-    `;
-
-    document.getElementById('recommendations').innerHTML = `
-        <h4>💡 Recommendations</h4>
-        ${data.health_analysis.recommendations.map(r => `<div class="recommendation">${r}</div>`).join('')}
-    `;
-}
-
-function navigateToCity(city) {
-    const cities = {
-        'Bhopal': [23.2599, 77.4126],
-        'Delhi': [28.6139, 77.2090],
-        'Mumbai': [19.0760, 72.8777]
-    };
-
-    const coords = cities[city];
-    selectionMap.setView(coords, 12);
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'none';
+        });
+    });
     
-    setTimeout(() => analyzeMapLocation(coords[0], coords[1]), 500);
-}
+    // Add animation to heat points
+    const heatPoints = document.querySelectorAll('.heat-point');
+    heatPoints.forEach(point => {
+        point.style.transition = 'all 0.3s ease';
+        point.addEventListener('mouseenter', function() {
+            this.style.transform = 'translate(-50%, -50%) scale(1.2)';
+        });
+        point.addEventListener('mouseleave', function() {
+            this.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+    });
+});
 
-async function handlePhotoUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const analysisDiv = document.getElementById('photoAnalysis');
-    analysisDiv.innerHTML = '<p>Analyzing photo...</p>';
-
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const response = await fetch('/api/analyze-photo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: e.target.result })
-            });
-
-            const data = await response.json();
-            
-            if (data.success) {
-                analysisDiv.innerHTML = `
-                    <h4>Photo Analysis</h4>
-                    <p>Green Cover: ${data.analysis.green_cover}%</p>
-                    <p>Built Area: ${data.analysis.built_area}%</p>
-                    <p>Water Bodies: ${data.analysis.water_cover}%</p>
-                    <h5>Suggestions:</h5>
-                    ${data.suggestions.map(s => `<p>${s}</p>`).join('')}
-                `;
-            }
-        } catch (error) {
-            analysisDiv.innerHTML = '<p>Analysis failed</p>';
-        }
-    };
-    reader.readAsDataURL(file);
+// Simple temperature prediction for demonstration
+function quickPredict(vegetation, builtArea, water, population) {
+    // Simple formula for demonstration
+    const baseTemp = 22;
+    const effect = (-6 * vegetation) + (8 * builtArea) + (-4 * water) + (population * 0.0002);
+    return Math.max(15, Math.min(45, baseTemp + effect));
 }
