@@ -67,11 +67,48 @@
         </div>
 
         <!-- Heat Map Panel -->
-        <div class="card heat-map">
-            <h2>🔥 Urban Heat Map</h2>
-            <div id="map" class="map-container"></div>
-            <div id="heatmapInfo" class="heatmap-info"></div>
+        <!-- Urban Configuration Panel -->
+<div class="card controls">
+    <h2>🗺️ Area Selection & Analysis</h2>
+    
+    <div class="map-selection">
+        <div id="selection-map" class="selection-map"></div>
+        <div class="map-controls">
+            <button onclick="selectArea('residential')" class="area-btn">🏠 Residential</button>
+            <button onclick="selectArea('commercial')" class="area-btn">🏢 Commercial</button>
+            <button onclick="selectArea('industrial')" class="area-btn">🏭 Industrial</button>
+            <button onclick="selectArea('mixed')" class="area-btn">🏘️ Mixed Use</button>
+            <button onclick="analyzeSelectedArea()" class="analyze-btn">🔍 Analyze Area</button>
         </div>
+    </div>
+    
+    <div class="area-analysis-results">
+        <div id="area-stats" class="area-stats">
+            <div class="stat-item">
+                <span class="stat-label">Selected Area:</span>
+                <span id="selected-area-type" class="stat-value">None</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Vegetation:</span>
+                <span id="auto-vegetation" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Built Area:</span>
+                <span id="auto-built-area" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Water Bodies:</span>
+                <span id="auto-water" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Population Density:</span>
+                <span id="auto-population" class="stat-value">-</span>
+            </div>
+        </div>
+    </div>
+    
+    <button class="predict-btn" onclick="predictFromMap()">🌡️ Predict Temperature Impact</button>
+</div>
 
         <!-- Location Selector -->
         <div class="card location-selector">
@@ -85,17 +122,38 @@
         </div>
 
         <!-- Spline 3D Integration -->
-        <div class="card spline-3d">
-            <h2>🎮 3D Urban Model</h2>
-            <div class="spline-container">
-                <iframe src="https://my.spline.design/3f20b8f2-b198-4d07-ba66-e7ece1a6d207" 
-                        frameborder="0" 
-                        class="spline-frame">
-                </iframe>
-            </div>
+        <!-- 3D Urban Models Section -->
+<div class="card spline-3d">
+    <h2>🏗️ 3D Urban Models</h2>
+    <div class="spline-tabs">
+        <button class="spline-tab active" onclick="showSplineModel('residential')">Residential Area</button>
+        <button class="spline-tab" onclick="showSplineModel('commercial')">Commercial Zone</button>
+        <button class="spline-tab" onclick="showSplineModel('green')">Green Space</button>
+        <button class="spline-tab" onclick="showSplineModel('mixed')">Mixed Use</button>
+    </div>
+    
+    <div class="spline-container">
+        <div id="residential-model" class="spline-model active">
+            <iframe src="https://my.spline.design/untitled-0e5c7e2d3e4a5a6b7c8d9e0f1g2h3i4j/" frameborder="0"></iframe>
+        </div>
+        <div id="commercial-model" class="spline-model">
+            <iframe src="https://my.spline.design/commercialbuildingscopy-ca254a1d3e4a5a6b7c8d9e0f1g2h3i4j/" frameborder="0"></iframe>
+        </div>
+        <div id="green-model" class="spline-model">
+            <iframe src="https://my.spline.design/greenparkcopy-0e5c7e2d3e4a5a6b7c8d9e0f1g2h3i4j/" frameborder="0"></iframe>
+        </div>
+        <div id="mixed-model" class="spline-model">
+            <iframe src="https://my.spline.design/mixedusecopy-0e5c7e2d3e4a5a6b7c8d9e0f1g2h3i4j/" frameborder="0"></iframe>
         </div>
     </div>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+    
+    <div class="model-info">
+        <h4 id="model-title">Residential Area Model</h4>
+        <p id="model-description">Low-rise housing with moderate density and green spaces</p>
+        <div class="model-stats">
+            <span>🏠 Density: Medium</span>
+            <span>🌳 Green Cover: 30%</span>
+            <span>🌡️ Heat Index: Low</span>
+        </div>
+    </div>
+</div>

@@ -260,6 +260,17 @@ def model_info():
         'feature_names': predictor.feature_names,
         'description': 'Urban heat island prediction for sustainable planning'
     })
+    
+@app.route('/api/area-configs')
+def get_area_configs():
+    """Get predefined area configurations"""
+    area_configs = {
+        'residential': {'vegetation': 0.25, 'built_area': 0.45, 'water': 0.08, 'population': 6000},
+        'commercial': {'vegetation': 0.10, 'built_area': 0.75, 'water': 0.03, 'population': 8000},
+        'industrial': {'vegetation': 0.08, 'built_area': 0.80, 'water': 0.05, 'population': 3000},
+        'mixed': {'vegetation': 0.20, 'built_area': 0.60, 'water': 0.06, 'population': 7000}
+    }
+    return jsonify({'success': True, 'configs': area_configs})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))

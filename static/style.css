@@ -345,3 +345,171 @@ body {
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
+:root {
+    --nasa-blue: #7894EE;
+    --nasa-red: #FF6B6B;
+    --nasa-white: #FFFFFF;
+    --nasa-dark: #1A1A2E;
+    --nasa-light-blue: #9BB1FF;
+    --nasa-green: #4ECDC4;
+    --nasa-purple: #6C63FF;
+    
+    --card-bg: rgba(120, 148, 238, 0.1);
+    --card-border: rgba(120, 148, 238, 0.3);
+}
+
+/* Update all color references throughout your CSS */
+.header {
+    background: rgba(120, 148, 238, 0.9);
+}
+
+.predict-btn {
+    background: linear-gradient(45deg, var(--nasa-blue), var(--nasa-light-blue));
+}
+
+.predict-btn:hover {
+    background: linear-gradient(45deg, var(--nasa-light-blue), var(--nasa-blue));
+}
+
+/* Map Selection Styles */
+.selection-map {
+    height: 300px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 2px solid var(--nasa-blue);
+}
+
+.map-controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.area-btn {
+    background: rgba(120, 148, 238, 0.2);
+    border: 1px solid var(--nasa-blue);
+    color: var(--nasa-white);
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.area-btn:hover {
+    background: var(--nasa-blue);
+    transform: translateY(-2px);
+}
+
+.analyze-btn {
+    grid-column: 1 / -1;
+    background: var(--nasa-green);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.area-stats {
+    background: rgba(120, 148, 238, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid var(--nasa-blue);
+    margin-top: 15px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+}
+
+.stat-label {
+    font-weight: 600;
+    color: var(--nasa-light-blue);
+}
+
+.stat-value {
+    font-weight: 600;
+}
+
+.analysis-complete {
+    animation: pulse 2s ease-in-out;
+}
+
+/* 3D Model Tabs */
+.spline-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.spline-tab {
+    background: rgba(120, 148, 238, 0.2);
+    border: 1px solid var(--nasa-blue);
+    color: var(--nasa-white);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+}
+
+.spline-tab.active {
+    background: var(--nasa-blue);
+}
+
+.spline-model {
+    display: none;
+    height: 400px;
+}
+
+.spline-model.active {
+    display: block;
+}
+
+.spline-model iframe {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.model-info {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(120, 148, 238, 0.1);
+    border-radius: 8px;
+}
+
+.model-stats {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.model-stats span {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .map-controls {
+        grid-template-columns: 1fr;
+    }
+    
+    .model-stats {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .spline-tabs {
+        justify-content: center;
+    }
+}

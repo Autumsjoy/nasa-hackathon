@@ -506,3 +506,231 @@ function addDynamicStyles() {
         document.head.appendChild(style);
     }
 }
+
+// Area type configurations with realistic urban data
+const AREA_CONFIGS = {
+    'residential': {
+        vegetation: 0.25,
+        built_area: 0.45,
+        water: 0.08,
+        population: 6000,
+        description: 'Residential area with parks and housing',
+        color: '#4ECDC4'
+    },
+    'commercial': {
+        vegetation: 0.10,
+        built_area: 0.75,
+        water: 0.03,
+        population: 8000,
+        description: 'Commercial district with high-rise buildings',
+        color: '#FF6B6B'
+    },
+    'industrial': {
+        vegetation: 0.08,
+        built_area: 0.80,
+        water: 0.05,
+        population: 3000,
+        description: 'Industrial zone with factories and warehouses',
+        color: '#FFA726'
+    },
+    'mixed': {
+        vegetation: 0.20,
+        built_area: 0.60,
+        water: 0.06,
+        population: 7000,
+        description: 'Mixed-use area with residential and commercial',
+        color: '#6C63FF'
+    }
+};
+
+// 3D Model configurations
+const SPLINE_MODELS = {
+    'residential': {
+        title: 'Residential Area Model',
+        description: 'Low-rise housing with moderate density and green spaces',
+        stats: ['🏠 Density: Medium', '🌳 Green Cover: 30%', '🌡️ Heat Index: Low']
+    },
+    'commercial': {
+        title: 'Commercial Zone Model',
+        description: 'High-rise buildings with intensive land use',
+        stats: ['🏢 Density: High', '🌳 Green Cover: 15%', '🌡️ Heat Index: High']
+    },
+    'green': {
+        title: 'Green Space Model',
+        description: 'Parks and recreational areas with natural vegetation',
+        stats: ['🌿 Density: Low', '🌳 Green Cover: 70%', '🌡️ Heat Index: Very Low']
+    },
+    'mixed': {
+        title: 'Mixed-Use Development',
+        description: 'Balanced combination of residential and commercial spaces',
+        stats: ['🏘️ Density: Medium-High', '🌳 Green Cover: 25%', '🌡️ Heat Index: Moderate']
+    }
+};
+
+let selectedAreaType = null;
+let selectionMap = null;
+let selectedAreaLayer = null;
+
+function initializeMapSelection() {
+    // Initialize selection map
+    selectionMap = L.map('selection-map').setView([23.2599, 77.4126], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(selectionMap);
+    
+    // Add satellite imagery layer option
+    L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0','mt1','mt2','mt3'],
+        attribution: '© Google Satellite'
+    }).addTo(selectionMap);
+}
+
+function selectArea(areaType) {
+    selectedAreaType = areaType;
+    
+    // Remove previous selection
+    if (selectedAreaLayer) {
+        selectionMap.removeLayer(selectedAreaLayer);
+    }
+    
+    // Add new selection area (simulated bounding box)
+    const config = AREA_CONFIGS[areaType];
+    const bounds = getRandomBounds(selectionMap.getCenter());
+    
+    selectedAreaLayer = L.rectangle(bounds, {
+        color: config.color,
+        fillColor: config.color,
+        fillOpacity: 0.3,
+        weight: 2
+    }).addTo(selectionMap);
+    
+    // Fit map to selected area
+    selectionMap.fitBounds(bounds);
+    
+    // Update UI
+    updateAreaSelectionUI(areaType, config);
+}
+
+function getRandomBounds(center) {
+    const lat = center.lat;
+    const lng = center.lng;
+    const variation = 0.01; // ~1km radius
+    
+    return [
+        [lat - variation, lng - variation],
+        [lat + variation, lng + variation]
+    ];
+}
+
+function updateAreaSelectionUI(areaType, config) {
+    document.getElementById('selected-area-type').textContent = areaType.charAt(0).toUpperCase() + areaType.slice(1);
+    document.getElementById('auto-vegetation').textContent = (config.vegetation * 100) + '%';
+    document.getElementById('auto-built-area').textContent = (config.built_area * 100) + '%';
+    document.getElementById('auto-water').textContent = (config.water * 100) + '%';
+    document.getElementById('auto-population').textContent = config.population.toLocaleString() + '/km²';
+    
+    // Update area description
+    const areaStats = document.querySelector('.area-stats');
+    areaStats.style.borderLeftColor = config.color;
+}
+
+function analyzeSelectedArea() {
+    if (!selectedAreaType) {
+        alert('Please select an area type first!');
+        return;
+    }
+    
+    const config = AREA_CONFIGS[selectedAreaType];
+    
+    // Simulate analysis with slight variations
+    const analyzedConfig = {
+        vegetation: Math.max(0, config.vegetation + (Math.random() * 0.1 - 0.05)),
+        built_area: Math.max(0, config.built_area + (Math.random() * 0.1 - 0.05)),
+        water: Math.max(0, config.water + (Math.random() * 0.05 - 0.025)),
+        population: Math.max(1000, config.population + (Math.random() * 2000 - 1000))
+    };
+    
+    // Update display with analyzed values
+    document.getElementById('auto-vegetation').textContent = (analyzedConfig.vegetation * 100).toFixed(1) + '%';
+    document.getElementById('auto-built-area').textContent = (analyzedConfig.built_area * 100).toFixed(1) + '%';
+    document.getElementById('auto-water').textContent = (analyzedConfig.water * 100).toFixed(1) + '%';
+    document.getElementById('auto-population').textContent = Math.round(analyzedConfig.population).toLocaleString() + '/km²';
+    
+    // Show analysis complete message
+    const analysisResults = document.querySelector('.area-analysis-results');
+    analysisResults.classList.add('analysis-complete');
+}
+
+async function predictFromMap() {
+    if (!selectedAreaType) {
+        alert('Please select and analyze an area first!');
+        return;
+    }
+    
+    const vegetation = parseFloat(document.getElementById('auto-vegetation').textContent) / 100;
+    const built_area = parseFloat(document.getElementById('auto-built-area').textContent) / 100;
+    const water = parseFloat(document.getElementById('auto-water').textContent) / 100;
+    const population = parseInt(document.getElementById('auto-population').textContent.replace(/[^0-9]/g, ''));
+    
+    // Use existing prediction function
+    await predictTemperatureWithValues(vegetation, built_area, water, population);
+}
+
+async function predictTemperatureWithValues(vegetation, built_area, water, population) {
+    // Show loading state
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '<p class="loading">Analyzing urban area...</p>';
+    
+    try {
+        const response = await fetch('/api/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vegetation, built_area, water, population })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayResults(data);
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        displayError('Prediction failed: ' + error.message);
+    }
+}
+
+// 3D Model Functions
+function showSplineModel(modelType) {
+    // Hide all models
+    document.querySelectorAll('.spline-model').forEach(model => {
+        model.classList.remove('active');
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.spline-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Show selected model
+    document.getElementById(`${modelType}-model`).classList.add('active');
+    event.target.classList.add('active');
+    
+    // Update model info
+    const modelInfo = SPLINE_MODELS[modelType];
+    document.getElementById('model-title').textContent = modelInfo.title;
+    document.getElementById('model-description').textContent = modelInfo.description;
+    
+    const statsContainer = document.querySelector('.model-stats');
+    statsContainer.innerHTML = modelInfo.stats.map(stat => 
+        `<span>${stat}</span>`
+    ).join('');
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeApp();
+    initializeMapSelection();
+});
