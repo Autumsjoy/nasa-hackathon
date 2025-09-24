@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Urban Planning Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌍 NASA Urban Planning Dashboard</h1>
+            <p>AI-powered urban temperature prediction and environmental analysis</p>
+        </div>
+
+        <!-- Urban Configuration Panel -->
+        <div class="card controls">
+            <h2>🏙️ Urban Configuration</h2>
+            <div class="slider-group">
+                <div class="slider-container">
+                    <label>Vegetation Coverage: <span id="vegetationValue">15%</span></label>
+                    <input type="range" id="vegetation" min="0" max="100" value="15" step="1" class="slider">
+                </div>
+                
+                <div class="slider-container">
+                    <label>Built Area: <span id="builtAreaValue">60%</span></label>
+                    <input type="range" id="builtArea" min="0" max="100" value="60" step="1" class="slider">
+                </div>
+                
+                <div class="slider-container">
+                    <label>Water Bodies: <span id="waterValue">5%</span></label>
+                    <input type="range" id="water" min="0" max="100" value="5" step="1" class="slider">
+                </div>
+                
+                <div class="slider-container">
+                    <label>Population Density: <span id="populationValue">8,000</span> people/km²</label>
+                    <input type="range" id="population" min="1000" max="20000" value="8000" step="1000" class="slider">
+                </div>
+            </div>
+            <button class="predict-btn" onclick="predictTemperature()">🌡️ Predict Temperature Impact</button>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="card results">
+            <h2>📊 Prediction Results</h2>
+            <div id="results" class="results-placeholder">
+                <p>Adjust sliders and click predict</p>
+            </div>
+            <div id="healthScore" class="health-score"></div>
+            <div id="recommendations" class="recommendations"></div>
+            <div id="impactFactors" class="impact-factors"></div>
+        </div>
+
+        <!-- Photo Upload Panel -->
+        <div class="card photo-upload">
+            <h2>📸 Urban Area Analysis</h2>
+            <div class="upload-container">
+                <input type="file" id="photoUpload" accept="image/*" class="file-input">
+                <label for="photoUpload" class="file-label">Choose Photo</label>
+            </div>
+            <canvas id="photoCanvas" style="display:none;"></canvas>
+            <div id="photoAnalysis" class="photo-analysis"></div>
+        </div>
+
+        <!-- Heat Map Panel -->
+        <div class="card heat-map">
+            <h2>🔥 Urban Heat Map</h2>
+            <div id="map" class="map-container"></div>
+            <div id="heatmapInfo" class="heatmap-info"></div>
+        </div>
+
+        <!-- Location Selector -->
+        <div class="card location-selector">
+            <h2>📍 City Analysis</h2>
+            <div class="city-buttons">
+                <button class="city-btn active" onclick="selectCity('Bhopal')">Bhopal</button>
+                <button class="city-btn" onclick="selectCity('Delhi')">Delhi</button>
+                <button class="city-btn" onclick="selectCity('Mumbai')">Mumbai</button>
+            </div>
+            <div id="cityProblems" class="city-problems"></div>
+        </div>
+
+        <!-- Spline 3D Integration -->
+        <div class="card spline-3d">
+            <h2>🎮 3D Urban Model</h2>
+            <div class="spline-container">
+                <iframe src="https://my.spline.design/3f20b8f2-b198-4d07-ba66-e7ece1a6d207" 
+                        frameborder="0" 
+                        class="spline-frame">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
