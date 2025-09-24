@@ -5,155 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NASA Urban Planning Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
 </head>
 <body>
     <div class="dashboard">
-        <!-- Header -->
         <div class="header">
             <h1>🌍 NASA Urban Planning Dashboard</h1>
-            <p>AI-powered urban temperature prediction and environmental analysis</p>
+            <p>Click on the map to analyze urban areas - AI-powered temperature predictions</p>
         </div>
 
-        <!-- Urban Configuration Panel -->
-        <div class="card controls">
-            <h2>🏙️ Urban Configuration</h2>
-            <div class="slider-group">
-                <div class="slider-container">
-                    <label>Vegetation Coverage: <span id="vegetationValue">15%</span></label>
-                    <input type="range" id="vegetation" min="0" max="100" value="15" step="1" class="slider">
+        <div class="card map-configuration">
+            <h2>🗺️ Map-Based Area Analysis</h2>
+            
+            <div class="map-controls">
+                <div class="control-group">
+                    <label>Area Type:</label>
+                    <select id="areaTypeSelect">
+                        <option value="auto_detect">Auto-Detect</option>
+                        <option value="residential">Residential</option>
+                        <option value="commercial">Commercial</option>
+                        <option value="industrial">Industrial</option>
+                        <option value="mixed_use">Mixed Use</option>
+                    </select>
                 </div>
-                
-                <div class="slider-container">
-                    <label>Built Area: <span id="builtAreaValue">60%</span></label>
-                    <input type="range" id="builtArea" min="0" max="100" value="60" step="1" class="slider">
-                </div>
-                
-                <div class="slider-container">
-                    <label>Water Bodies: <span id="waterValue">5%</span></label>
-                    <input type="range" id="water" min="0" max="100" value="5" step="1" class="slider">
-                </div>
-                
-                <div class="slider-container">
-                    <label>Population Density: <span id="populationValue">8,000</span> people/km²</label>
-                    <input type="range" id="population" min="1000" max="20000" value="8000" step="1000" class="slider">
+                <div class="control-group">
+                    <label>Quick Navigation:</label>
+                    <select id="citySelect">
+                        <option value="">Select city...</option>
+                        <option value="Bhopal">Bhopal</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Mumbai">Mumbai</option>
+                    </select>
                 </div>
             </div>
-            <button class="predict-btn" onclick="predictTemperature()">🌡️ Predict Temperature Impact</button>
+
+            <div id="selection-map" class="selection-map"></div>
+            
+            <div class="click-instruction">
+                <p>📍 <strong>Click anywhere on the map</strong> to analyze urban configuration</p>
+            </div>
+
+            <div id="location-analysis" class="location-analysis hidden">
+                <div class="analysis-header">
+                    <h3>📊 Area Analysis Results</h3>
+                    <span id="analysis-confidence" class="confidence-badge">85% confidence</span>
+                </div>
+                
+                <div class="analysis-grid">
+                    <div class="analysis-item">
+                        <span class="analysis-label">Area Type:</span>
+                        <span id="analyzed-area-type" class="analysis-value"></span>
+                    </div>
+                    <div class="analysis-item">
+                        <span class="analysis-label">Vegetation:</span>
+                        <span id="analyzed-vegetation" class="analysis-value"></span>
+                    </div>
+                    <div class="analysis-item">
+                        <span class="analysis-label">Built Area:</span>
+                        <span id="analyzed-built-area" class="analysis-value"></span>
+                    </div>
+                    <div class="analysis-item">
+                        <span class="analysis-label">Water Bodies:</span>
+                        <span id="analyzed-water" class="analysis-value"></span>
+                    </div>
+                    <div class="analysis-item">
+                        <span class="analysis-label">Population Density:</span>
+                        <span id="analyzed-population" class="analysis-value"></span>
+                    </div>
+                </div>
+
+                <div id="area-suggestions" class="area-suggestions"></div>
+
+                <button class="predict-btn" onclick="predictFromMapAnalysis()">
+                    🌡️ Predict Temperature Impact
+                </button>
+            </div>
         </div>
 
-        <!-- Results Panel -->
         <div class="card results">
             <h2>📊 Prediction Results</h2>
             <div id="results" class="results-placeholder">
-                <p>Adjust sliders and click predict</p>
+                <p>Click on the map and analyze an area to see predictions</p>
             </div>
             <div id="healthScore" class="health-score"></div>
             <div id="recommendations" class="recommendations"></div>
             <div id="impactFactors" class="impact-factors"></div>
         </div>
 
-        <!-- Photo Upload Panel -->
         <div class="card photo-upload">
-            <h2>📸 Urban Area Analysis</h2>
+            <h2>📸 Urban Photo Analysis</h2>
             <div class="upload-container">
                 <input type="file" id="photoUpload" accept="image/*" class="file-input">
-                <label for="photoUpload" class="file-label">Choose Photo</label>
+                <label for="photoUpload" class="file-label">Choose Urban Photo</label>
             </div>
-            <canvas id="photoCanvas" style="display:none;"></canvas>
             <div id="photoAnalysis" class="photo-analysis"></div>
         </div>
 
-        <!-- Heat Map Panel -->
-        <!-- Urban Configuration Panel -->
-<div class="card controls">
-    <h2>🗺️ Area Selection & Analysis</h2>
-    
-    <div class="map-selection">
-        <div id="selection-map" class="selection-map"></div>
-        <div class="map-controls">
-            <button onclick="selectArea('residential')" class="area-btn">🏠 Residential</button>
-            <button onclick="selectArea('commercial')" class="area-btn">🏢 Commercial</button>
-            <button onclick="selectArea('industrial')" class="area-btn">🏭 Industrial</button>
-            <button onclick="selectArea('mixed')" class="area-btn">🏘️ Mixed Use</button>
-            <button onclick="analyzeSelectedArea()" class="analyze-btn">🔍 Analyze Area</button>
-        </div>
-    </div>
-    
-    <div class="area-analysis-results">
-        <div id="area-stats" class="area-stats">
-            <div class="stat-item">
-                <span class="stat-label">Selected Area:</span>
-                <span id="selected-area-type" class="stat-value">None</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Vegetation:</span>
-                <span id="auto-vegetation" class="stat-value">-</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Built Area:</span>
-                <span id="auto-built-area" class="stat-value">-</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Water Bodies:</span>
-                <span id="auto-water" class="stat-value">-</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Population Density:</span>
-                <span id="auto-population" class="stat-value">-</span>
-            </div>
-        </div>
-    </div>
-    
-    <button class="predict-btn" onclick="predictFromMap()">🌡️ Predict Temperature Impact</button>
-</div>
-
-        <!-- Location Selector -->
-        <div class="card location-selector">
-            <h2>📍 City Analysis</h2>
-            <div class="city-buttons">
-                <button class="city-btn active" onclick="selectCity('Bhopal')">Bhopal</button>
-                <button class="city-btn" onclick="selectCity('Delhi')">Delhi</button>
-                <button class="city-btn" onclick="selectCity('Mumbai')">Mumbai</button>
-            </div>
-            <div id="cityProblems" class="city-problems"></div>
+        <div class="card heat-map">
+            <h2>🔥 Urban Heat Map</h2>
+            <div id="heat-map-container" class="heat-map-container"></div>
+            <div id="heatmapInfo" class="heatmap-info"></div>
         </div>
 
-        <!-- Spline 3D Integration -->
-        <!-- 3D Urban Models Section -->
-<div class="card spline-3d">
-    <h2>🏗️ 3D Urban Models</h2>
-    <div class="spline-tabs">
-        <button class="spline-tab active" onclick="showSplineModel('residential')">Residential Area</button>
-        <button class="spline-tab" onclick="showSplineModel('commercial')">Commercial Zone</button>
-        <button class="spline-tab" onclick="showSplineModel('green')">Green Space</button>
-        <button class="spline-tab" onclick="showSplineModel('mixed')">Mixed Use</button>
-    </div>
-    
-    <div class="spline-container">
-        <div id="residential-model" class="spline-model active">
-            <iframe src="https://my.spline.design/untitled-0e5c7e2d3e4a5a6b7c8d9e0f1g2h3i4j/" frameborder="0"></iframe>
-        </div>
-        <div id="commercial-model" class="spline-model">
-            <iframe src="https://my.spline.design/commercialbuildingscopy-ca254a1d3e4a5a6b7c8d9e0f1g2h3i4j/" frameborder="0"></iframe>
-        </div>
-        <div id="green-model" class="spline-model">
-            <iframe src="https://my.spline.design/greenparkcopy-0e5c7e2d3e4a5a6b7c8d9e0f1g2h3i4j/" frameborder="0"></iframe>
-        </div>
-        <div id="mixed-model" class="spline-model">
-            <iframe src="https://my.spline.design/mixedusecopy-0e5c7e2d3e4a5a6b7c8d9e0f1g2h3i4j/" frameborder="0"></iframe>
+        <div class="card spline-3d">
+            <h2>🏗️ 3D Urban Models</h2>
+            <div class="spline-container">
+                <iframe src="https://my.spline.design/untitled-c6aae1c2c1f1c1a1a1a1a1a1a1a1a1a1/" 
+                        frameborder="0" 
+                        class="spline-frame">
+                </iframe>
+            </div>
         </div>
     </div>
-    
-    <div class="model-info">
-        <h4 id="model-title">Residential Area Model</h4>
-        <p id="model-description">Low-rise housing with moderate density and green spaces</p>
-        <div class="model-stats">
-            <span>🏠 Density: Medium</span>
-            <span>🌳 Green Cover: 30%</span>
-            <span>🌡️ Heat Index: Low</span>
-        </div>
-    </div>
-</div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
