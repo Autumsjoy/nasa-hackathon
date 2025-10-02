@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ area_name }} - Detailed Analysis | NASA Hackathon</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary-color: #50589C;
+            --primary-light: #6A72B0;
+            --primary-dark: #404780;
+        }
+        .analysis-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(80, 88, 156, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .area-nav {
+            background: var(--primary-color);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .area-nav select {
+            background: white;
+            border: 2px solid var(--primary-light);
+            border-radius: 5px;
+            padding: 8px 15px;
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}" style="color: #50589C;">
+                🌌 NASA Urban Planning
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
+                <a class="nav-link active" href="{{ url_for('area_analysis', area_key=area_key) }}">{{ area_name }}</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="analysis-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold">{{ area_name }}</h1>
+                    <p class="lead mb-0">Detailed Sustainability Analysis</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="area-nav">
+                        <select id="areaSelector" onchange="navigateToArea(this.value)" class="form-select">
+                            <option value="">Select Area...</option>
+                            {% for key, name in area_mappings.items() %}
+                            <option value="{{ key }}" {% if key == area_key %}selected{% endif %}>
+                                {{ name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card metric-card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Sustainability Score</h5>
+                        <div class="metric-value">{{ area_data.sustainability_score }}/100</div>
+                        <small class="text-muted">Overall Rating</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Transport Index</h5>
+                        <div class="metric-value">{{ area_data.transport_index }}/10</div>
+                        <small class="text-muted">Mobility Score</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Energy Index</h5>
+                        <div class="metric-value">{{ area_data.energy_index }}/10</div>
+                        <small class="text-muted">Power Efficiency</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Pollution Index</h5>
+                        <div class="metric-value">{{ area_data.pollution_index }}/10</div>
+                        <small class="text-muted">Lower is Better</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 style="color: #50589C;">Sustainability Metrics</h4>
+                    <img src="{{ sustainability_chart }}" alt="Sustainability Chart" class="img-fluid">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 style="color: #50589C;">Radar Analysis</h4>
+                    <img src="{{ radar_chart }}" alt="Radar Chart" class="img-fluid">
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 style="color: #50589C;">Energy Breakdown</h4>
+                    <img src="{{ energy_chart }}" alt="Energy Chart" class="img-fluid">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 style="color: #50589C;">Transportation Analysis</h4>
+                    <img src="{{ transport_chart }}" alt="Transport Chart" class="img-fluid">
+                </div>
+            </div>
+        </div>
+
+        <!-- Area Comparison -->
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h4 style="color: #50589C;">Comparison with Other Areas</h4>
+                    <img src="{{ comparison_chart }}" alt="Comparison Chart" class="img-fluid">
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Information -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header" style="background-color: #50589C; color: white;">
+                        <h5 class="mb-0">Environmental Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <tr>
+                                <td><strong>Vegetation Index:</strong></td>
+                                <td>{{ "%.2f"|format(area_data.vegetation_index) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Urbanization Level:</strong></td>
+                                <td>{{ area_data.urbanization_level }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Green Cover:</strong></td>
+                                <td>{{ area_data.green_cover }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Solar Potential:</strong></td>
+                                <td>{{ area_data.solar_potential }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header" style="background-color: #50589C; color: white;">
+                        <h5 class="mb-0">Infrastructure Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <tr>
+                                <td><strong>Area Type:</strong></td>
+                                <td>{{ area_data.type }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Population Density:</strong></td>
+                                <td>{{ area_data.population_density }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Grid Dependency:</strong></td>
+                                <td>{{ area_data.grid_dependency }}%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Solar Percentage:</strong></td>
+                                <td>{{ area_data.solar_percentage }}%</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="row mt-4 mb-5">
+            <div class="col-12 text-center">
+                <a href="{{ url_for('analysis_page') }}" class="btn btn-outline-primary me-2">
+                    ← Back to All Areas
+                </a>
+                <a href="{{ url_for('satellite_3d') }}" class="btn btn-primary">
+                    View 3D Satellite Map →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function navigateToArea(areaKey) {
+            if (areaKey) {
+                window.location.href = `/analysis/${areaKey}`;
+            }
+        }
+
+        // Add interactive features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add loading states
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.addEventListener('load', function() {
+                    this.style.opacity = '1';
+                });
+                img.style.opacity = '0';
+                img.style.transition = 'opacity 0.3s ease';
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

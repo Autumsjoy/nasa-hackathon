@@ -3,144 +3,407 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Satellite Maps - Bhopal Urban Planning</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <title>Satellite Data Analysis | NASA Hackathon</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         :root {
-            --primary: #50589C;
-            --secondary: #7A6FBE;
-            --accent: #FF6B6B;
-            --dark: #2D3748;
-            --light: #F7FAFC;
+            --primary-color: #50589C;
+            --primary-light: #6A72B0;
+            --primary-dark: #404780;
         }
-        
-        .nav-custom {
-            background: linear-gradient(135deg, var(--dark), var(--primary)) !important;
-        }
-        
-        #cesiumContainer {
-            width: 100%;
-            height: 600px;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .control-panel {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        
-        .section-title {
-            color: var(--dark);
-            font-weight: 700;
-            margin-bottom: 2rem;
-            border-bottom: 3px solid var(--accent);
-            padding-bottom: 10px;
-        }
-        
-        .btn-cesium {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        .satellite-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        .data-card {
             border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            margin: 5px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-cesium:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(80, 88, 156, 0.4);
-            color: white;
-        }
-        
-        .info-card {
-            background: white;
             border-radius: 10px;
-            padding: 15px;
-            margin: 10px 0;
-            border-left: 4px solid var(--primary);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(80, 88, 156, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
         }
+        .data-card:hover {
+            transform: translateY(-5px);
+        }
+        .satellite-image {
+            border-radius: 10px;
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+        .indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .excellent { background-color: #27AE60; }
+        .good { background-color: #2ECC71; }
+        .moderate { background-color: #F39C12; }
+        .poor { background-color: #E74C3C; }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark nav-custom">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-city me-2"></i>
-                Bhopal Urban Planning
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}" style="color: #50589C;">
+                🌌 NASA Urban Planning
             </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/">Home</a>
-                <a class="nav-link" href="/dashboard">Dashboard</a>
-                <a class="nav-link active" href="/satellite">3D Maps</a>
-                <a class="nav-link" href="/heatmaps">Heat Maps</a>
-                <a class="nav-link" href="/analysis">Analysis</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
+                    <a class="nav-link active" href="{{ url_for('satellite_analysis') }}">Satellite Data</a>
+                    <a class="nav-link" href="{{ url_for('satellite_3d') }}">3D Map</a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid py-5 mt-4">
+    <!-- Header -->
+    <div class="satellite-header">
         <div class="container">
-            <h1 class="section-title">3D Satellite Mapping</h1>
-            <p class="lead mb-4">
-                Explore Bhopal in stunning 3D with real-time satellite imagery and terrain data powered by Cesium JS.
-            </p>
-
-            <!-- Control Panel -->
-            <div class="control-panel">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h5><i class="fas fa-sliders-h me-2"></i>Map Controls</h5>
-                        <p class="text-muted mb-0">Switch between different satellite layers and visualization modes</p>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <button class="btn btn-cesium" onclick="switchToSatellite()">
-                            <i class="fas fa-satellite me-2"></i>Satellite View
-                        </button>
-                        <button class="btn btn-cesium" onclick="switchToTerrain()">
-                            <i class="fas fa-mountain me-2"></i>Terrain View
-                        </button>
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold">🛰️ Satellite Data Analysis</h1>
+                    <p class="lead mb-0">Remote Sensing & Earth Observation Data for Urban Planning</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group">
+                        <a href="{{ url_for('satellite_3d') }}" class="btn btn-light">
+                            🌍 3D Satellite View
+                        </a>
+                        <a href="{{ url_for('download_satellite_data') }}" class="btn btn-outline-light">
+                            📥 Download Data
+                        </a>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Cesium Container -->
-            <div id="cesiumContainer"></div>
-
-            <!-- Area Information -->
-            <div class="row mt-5">
-                <div class="col-md-6">
-                    <div class="info-card">
-                        <h6><i class="fas fa-info-circle me-2" style="color: var(--primary);"></i>About 3D Mapping</h6>
-                        <p class="mb-0">This 3D visualization uses Cesium JS with NASA satellite data to provide interactive urban planning insights.</p>
+    <div class="container">
+        <!-- Satellite Data Overview -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card data-card">
+                    <div class="card-header" style="background-color: #50589C; color: white;">
+                        <h4 class="mb-0">Satellite Data Sources</h4>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="info-card">
-                        <h6><i class="fas fa-database me-2" style="color: var(--primary);"></i>Data Sources</h6>
-                        <p class="mb-0">Sentinel-2 imagery, MODIS vegetation data, Landsat urban analysis, and digital elevation models.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Legend -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="control-panel">
-                        <h5><i class="fas fa-palette me-2"></i>Map Legend</h5>
+                    <div class="card-body">
                         <div class="row">
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center mb-2">
-                                    <div style="width: 20px; height: 20px; background: #48BB78; border-radius: 50%; margin-right: 10px;"></
+                            <div class="col-md-3 text-center">
+                                <div class="mb-3">
+                                    <h5>🛰️ Landsat 8/9</h5>
+                                    <small class="text-muted">30m Resolution</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="mb-3">
+                                    <h5>🌿 MODIS</h5>
+                                    <small class="text-muted">Vegetation & Temperature</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="mb-3">
+                                    <h5>☀️ NASA POWER</h5>
+                                    <small class="text-muted">Solar Energy Data</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="mb-3">
+                                    <h5>🌫️ Air Quality</h5>
+                                    <small class="text-muted">Pollution Monitoring</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Charts -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card data-card">
+                    <div class="card-header" style="background-color: #50589C; color: white;">
+                        <h5 class="mb-0">Satellite Data Comparison</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if satellite_chart %}
+                            {{ satellite_chart|safe }}
+                        {% else %}
+                            <div class="alert alert-warning">Satellite data chart not available</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card data-card">
+                    <div class="card-header" style="background-color: #50589C; color: white;">
+                        <h5 class="mb-0">Vegetation Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if vegetation_chart %}
+                            {{ vegetation_chart|safe }}
+                        {% else %}
+                            <div class="alert alert-warning">Vegetation chart not available</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Area-wise Satellite Data -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card data-card">
+                    <div class="card-header" style="background-color: #50589C; color: white;">
+                        <h5 class="mb-0">Area-wise Satellite Data Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Area</th>
+                                        <th>NDVI</th>
+                                        <th>Vegetation Health</th>
+                                        <th>Urbanization</th>
+                                        <th>Land Surface Temp</th>
+                                        <th>Land Cover</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for area_key, area_data in data.items() %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ area_data.name }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ area_data.type }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold" style="color: #50589C;">
+                                                {{ "%.3f"|format(area_data.vegetation_index) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% set health = area_data.vegetation_health %}
+                                            <span class="indicator {% if health == 'Excellent' %}excellent{% elif health == 'Good' %}good{% elif health == 'Moderate' %}moderate{% else %}poor{% endif %}"></span>
+                                            {{ health }}
+                                        </td>
+                                        <td>
+                                            {{ area_data.urbanization_level }}
+                                            <br>
+                                            <small>NDBI: {{ "%.3f"|format(area_data.urbanization_index) }}</small>
+                                        </td>
+                                        <td>
+                                            {{ "%.1f"|format(area_data.temperature) }}°C
+                                            <br>
+                                            <small>+{{ "%.1f"|format(area_data.urban_heat_intensity) }}°C UHI</small>
+                                        </td>
+                                        <td>
+                                            {{ area_data.modis_land_cover.land_cover_type }}
+                                            <br>
+                                            <small>{{ "%.1f"|format(area_data.modis_land_cover.confidence * 100) }}% confidence</small>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('area_analysis', area_key=area_key) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                View Details
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODIS Data Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card data-card">
+                    <div class="card-header" style="background-color: #50589C; color: white;">
+                        <h5 class="mb-0">MODIS Satellite Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for area_key, area_data in data.items() %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ area_data.name }}</h6>
+                                        
+                                        <!-- Vegetation Data -->
+                                        <div class="mb-2">
+                                            <small class="text-muted">Vegetation Indices:</small>
+                                            <div class="d-flex justify-content-between">
+                                                <span>NDVI: <strong>{{ "%.3f"|format(area_data.modis_vegetation.ndvi) }}</strong></span>
+                                                <span>EVI: <strong>{{ "%.3f"|format(area_data.modis_vegetation.evi) }}</strong></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Temperature Data -->
+                                        <div class="mb-2">
+                                            <small class="text-muted">Temperature:</small>
+                                            <div>
+                                                Day: <strong>{{ "%.1f"|format(area_data.modis_temperature.daytime_temperature) }}°C</strong>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Land Cover -->
+                                        <div class="mb-2">
+                                            <small class="text-muted">Land Cover:</small>
+                                            <div>{{ area_data.modis_land_cover.land_cover_type }}</div>
+                                        </div>
+                                        
+                                        <!-- Data Source -->
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                Source: {{ area_data.modis_vegetation.source }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Chart -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card data-card">
+                    <div class="card-header" style="background-color: #50589C; color: white;">
+                        <h5 class="mb-0">Multi-Area Comparison</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if comparison_chart %}
+                            {{ comparison_chart|safe }}
+                        {% else %}
+                            <div class="alert alert-warning">Comparison chart not available</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Quality Information -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card data-card">
+                    <div class="card-header" style="background-color: #50589C; color: white;">
+                        <h5 class="mb-0">Data Quality & Sources</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Data Sources:</h6>
+                        <ul>
+                            <li><strong>Landsat 8/9:</strong> 30m spatial resolution</li>
+                            <li><strong>MODIS:</strong> 250m-1000m resolution</li>
+                            <li><strong>NASA POWER:</strong> Solar radiation data</li>
+                            <li><strong>Simulated Data:</strong> Used when API unavailable</li>
+                        </ul>
+                        
+                        <h6>Indices Calculated:</h6>
+                        <ul>
+                            <li><strong>NDVI:</strong> Normalized Difference Vegetation Index</li>
+                            <li><strong>EVI:</strong> Enhanced Vegetation Index</li>
+                            <li><strong>NDBI:</strong> Normalized Difference Built-up Index</li>
+                            <li><strong>LST:</strong> Land Surface Temperature</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card data-card">
+                    <div class="card-header" style="background-color: #50589C; color: white;">
+                        <h5 class="mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('satellite_3d') }}" class="btn btn-primary">
+                                🌍 Explore 3D Satellite View
+                            </a>
+                            <a href="{{ url_for('download_satellite_data') }}" class="btn btn-outline-primary">
+                                📥 Download Satellite Data (CSV)
+                            </a>
+                            <a href="{{ url_for('download_geojson') }}" class="btn btn-outline-primary">
+                                🗺️ Download GeoJSON Data
+                            </a>
+                            <a href="{{ url_for('api_analysis') }}" class="btn btn-outline-secondary">
+                                🔗 Access API Data
+                            </a>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h6>Recent Updates:</h6>
+                        <ul>
+                            <li>Real-time satellite data processing</li>
+                            <li>Enhanced vegetation analysis</li>
+                            <li>Urban heat island detection</li>
+                            <li>3D visualization capabilities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>NASA Hackathon Project</h5>
+                    <p>Urban Planning & Sustainability Analysis using Satellite Data</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2025 NASA Space Apps Challenge<br>
+                    Bhopal Urban Planning Initiative</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add interactive features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers for area cards
+            const areaCards = document.querySelectorAll('.card.h-100');
+            areaCards.forEach(card => {
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', function() {
+                    const areaName = this.querySelector('.card-title').textContent;
+                    console.log('Selected area:', areaName);
+                });
+            });
+
+            // Auto-refresh data every 5 minutes
+            setTimeout(() => {
+                window.location.reload();
+            }, 300000); // 5 minutes
+        });
+    </script>
+</body>
+</html>

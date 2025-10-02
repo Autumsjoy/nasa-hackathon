@@ -157,7 +157,23 @@
                                     <div style="width: 20px; height: 20px; background: yellow; border-radius: 3px; margin-right: 10px;"></div>
                                     <span>Average</span>
                                 </div>
-                            </div>
+                            </div><div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 style="color: #50589C;">Quick Area Navigation</h5>
+                <div class="btn-group flex-wrap" role="group">
+                    {% for area_key, area_name in area_mappings.items() %}
+                    <a href="{{ url_for('area_analysis', area_key=area_key) }}" 
+                       class="btn btn-outline-primary btn-sm me-2 mb-2">
+                        {{ area_name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                             <div class="col-md-3">
                                 <div class="d-flex align-items-center mb-2">
                                     <div style="width: 20px; height: 20px; background: green; border-radius: 3px; margin-right: 10px;"></div>

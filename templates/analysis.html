@@ -3,293 +3,433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis - NASA Urban Analytics</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Detailed Analysis | NASA Hackathon</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         :root {
-            --nasa-blue: #0b3d91;
-            --nasa-light-blue: #1a6bc7;
-            --nasa-dark-blue: #06255e;
-            --nasa-accent: #ffd700;
+            --primary-color: #50589C;
+            --primary-light: #6A72B0;
+            --primary-dark: #404780;
+            --secondary-color: #FF6B35;
+            --accent-color: #4ECDC4;
+            --dark-color: #2C3E50;
+            --light-color: #F8F9FA;
         }
         
-        .nav-gradient {
-            background: linear-gradient(135deg, var(--nasa-dark-blue), var(--nasa-blue)) !important;
+        .analysis-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
         }
         
-        .card {
+        .detail-card {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(80, 88, 156, 0.15);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
         }
         
-        .card-header {
-            background: linear-gradient(135deg, var(--nasa-blue), var(--nasa-light-blue)) !important;
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            border: none;
-            padding: 1.5rem;
+        .detail-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(80, 88, 156, 0.2);
         }
         
-        .table th {
-            background-color: var(--nasa-blue);
-            color: white;
-        }
-        
-        .section-title {
-            color: var(--nasa-blue);
-            font-weight: 700;
-            margin-bottom: 2rem;
-            border-bottom: 3px solid var(--nasa-accent);
-            padding-bottom: 10px;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, var(--nasa-blue), var(--nasa-light-blue));
-            color: white;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(11, 61, 145, 0.3);
-        }
-        
-        .stat-number {
+        .metric-value {
             font-size: 2rem;
             font-weight: bold;
-            margin-bottom: 10px;
+            color: var(--primary-color);
         }
         
-        .alert-nasa {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border: 1px solid var(--nasa-light-blue);
-            border-radius: 10px;
-            color: var(--nasa-dark-blue);
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .area-selector {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--primary-color);
         }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark nav-gradient">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-satellite me-2"></i>
-                NASA Urban Analytics
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}" style="color: var(--primary-color);">
+                🌌 NASA Urban Planning
             </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/">Home</a>
-                <a class="nav-link" href="/dashboard">Dashboard</a>
-                <a class="nav-link" href="/heatmaps">Heat Maps</a>
-                <a class="nav-link" href="/satellite">Satellite Data</a>
-                <a class="nav-link active" href="/analysis">Analysis</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a class="nav-link active" href="{{ url_for('analysis_page') }}">Analysis</a>
+                    <a class="nav-link" href="{{ url_for('satellite_analysis') }}">Satellite</a>
+                    <a class="nav-link" href="{{ url_for('heatmaps') }}">Heat Maps</a>
+                    <a class="nav-link" href="{{ url_for('satellite_3d') }}">3D Map</a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid py-5 mt-4">
+    <!-- Header -->
+    <div class="analysis-header">
         <div class="container">
-            <h1 class="section-title">Detailed Technical Analysis</h1>
-            <p class="lead mb-5">Comprehensive breakdown of urban sustainability metrics across Bhopal using NASA satellite data.</p>
-
-            <!-- Data Table -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-table me-2"></i>Complete Dataset
-                    </h5>
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold">📊 Detailed Area Analysis</h1>
+                    <p class="lead mb-0">Comprehensive sustainability metrics for all Bhopal areas</p>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Area</th>
-                                    <th>Transport</th>
-                                    <th>Pollution</th>
-                                    <th>Energy</th>
-                                    <th>Solar Potential</th>
-                                    <th>Capacity</th>
-                                    <th>Sustainability Score</th>
-                                    <th>Population</th>
-                                    <th>Green Cover</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for area, area_data in data.items() %}
-                                <tr>
-                                    <td><strong>{{ area_data.name }}</strong></td>
-                                    <td>
-                                        <span class="badge 
-                                            {% if area_data.transport_index >= 70 %}bg-success
-                                            {% elif area_data.transport_index >= 50 %}bg-warning
-                                            {% else %}bg-danger{% endif %}">
-                                            {{ "%.1f"|format(area_data.transport_index) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge 
-                                            {% if area_data.pollution_index <= 30 %}bg-success
-                                            {% elif area_data.pollution_index <= 60 %}bg-warning
-                                            {% else %}bg-danger{% endif %}">
-                                            {{ "%.1f"|format(area_data.pollution_index) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge 
-                                            {% if area_data.energy_index >= 70 %}bg-success
-                                            {% elif area_data.energy_index >= 50 %}bg-warning
-                                            {% else %}bg-danger{% endif %}">
-                                            {{ "%.1f"|format(area_data.energy_index) }}
-                                        </span>
-                                    </td>
-                                    <td>{{ "%.1f"|format(area_data.solar_potential) }} kWh/m²/day</td>
-                                    <td>
-                                        <span class="badge 
-                                            {% if area_data.renewable_capacity in ['Excellent','Very High'] %}bg-success
-                                            {% elif area_data.renewable_capacity == 'High' %}bg-info
-                                            {% elif area_data.renewable_capacity == 'Medium' %}bg-warning
-                                            {% else %}bg-danger{% endif %}">
-                                            {{ area_data.renewable_capacity }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge 
-                                            {% if area_data.sustainability_score >= 70 %}bg-success
-                                            {% elif area_data.sustainability_score >= 50 %}bg-warning
-                                            {% else %}bg-danger{% endif %}">
-                                            {{ "%.1f"|format(area_data.sustainability_score) }}
-                                        </span>
-                                    </td>
-                                    <td>{{ area_data.population_density }}</td>
-                                    <td>{{ area_data.green_cover }}%</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Methodology & Data Sources -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-calculator me-2"></i>Methodology
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="text-nasa-blue">Transport Index Calculation</h6>
-                            <ul>
-                                <li>Public Transport Availability: 40% weight</li>
-                                <li>Walking & Cycling Infrastructure: 30% weight</li>
-                                <li>Private Vehicle Usage (inverse): 30% weight</li>
-                            </ul>
-
-                            <h6 class="text-nasa-blue">Pollution Index Calculation</h6>
-                            <ul>
-                                <li>PM2.5 Levels: 30% weight</li>
-                                <li>PM10 Levels: 30% weight</li>
-                                <li>NO2 Concentration: 20% weight</li>
-                                <li>SO2 Concentration: 20% weight</li>
-                            </ul>
-
-                            <h6 class="text-nasa-blue">Energy Index Calculation</h6>
-                            <ul>
-                                <li>Solar Energy Usage: 40% weight</li>
-                                <li>Battery Storage: 30% weight</li>
-                                <li>Grid Dependency (inverse): 30% weight</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-database me-2"></i>Data Sources
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="text-nasa-blue">NASA APIs Used</h6>
-                            <ul>
-                                <li>POWER API - Solar radiation data</li>
-                                <li>MODIS - Vegetation and temperature data</li>
-                                <li>Landsat - High-resolution urban analysis</li>
-                                <li>Simulated Air Quality Models</li>
-                            </ul>
-
-                            <h6 class="text-nasa-blue">Local Data Sources</h6>
-                            <ul>
-                                <li>Bhopal Municipal Corporation</li>
-                                <li>Transport Department Data</li>
-                                <li>Census Population Data</li>
-                                <li>Urban Development Reports</li>
-                            </ul>
-
-                            <div class="alert alert-nasa mt-3">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Note:</strong> Some data is simulated when NASA APIs are rate-limited. All simulated data is based on realistic Bhopal urban characteristics.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Key Metrics Summary -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-chart-bar me-2"></i>Key Metrics Summary
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row text-center">
-                                <div class="col-md-3 mb-3">
-                                    <div class="stat-card">
-                                        <div class="stat-number">
-                                            {{ data.values()|map(attribute='transport_index')|list|sum / data.values()|length|round(1) }}
-                                        </div>
-                                        <div>Avg Transport Index</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="stat-card">
-                                        <div class="stat-number">
-                                            {{ data.values()|map(attribute='pollution_index')|list|sum / data.values()|length|round(1) }}
-                                        </div>
-                                        <div>Avg Pollution Index</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="stat-card">
-                                        <div class="stat-number">
-                                            {{ data.values()|map(attribute='energy_index')|list|sum / data.values()|length|round(1) }}
-                                        </div>
-                                        <div>Avg Energy Index</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="stat-card">
-                                        <div class="stat-number">
-                                            {{ data.values()|map(attribute='sustainability_score')|list|sum / data.values()|length|round(1) }}
-                                        </div>
-                                        <div>Avg Sustainability</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group">
+                        <a href="{{ url_for('download_csv') }}" class="btn btn-light">
+                            📥 Export Data
+                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light">
+                            ← Dashboard
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="container">
+        <!-- Area Selector -->
+        <div class="area-selector">
+            <h4 style="color: var(--primary-color);">Select Area for Detailed Analysis</h4>
+            <div class="row">
+                {% for area_key, area_name in area_mappings.items() %}
+                <div class="col-md-4 mb-2">
+                    <a href="{{ url_for('area_analysis', area_key=area_key) }}" 
+                       class="btn btn-outline-primary w-100 text-start">
+                        📍 {{ area_name }}
+                        <span class="badge bg-primary float-end">
+                            {{ "%.1f"|format(data[area_key].sustainability_score) }}
+                        </span>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Main Charts -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 style="color: var(--primary-color);">📈 Sustainability Comparison</h4>
+                    {% if sustainability_chart %}
+                        {{ sustainability_chart|safe }}
+                    {% else %}
+                        <div class="alert alert-warning">Chart not available</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 style="color: var(--primary-color);">📊 Multi-Metric Analysis</h4>
+                    {% if comparison_chart %}
+                        {{ comparison_chart|safe }}
+                    {% else %}
+                        <div class="alert alert-warning">Chart not available</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Radar Chart -->
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h4 style="color: var(--primary-color);">🎯 Comprehensive Area Comparison</h4>
+                    {% if radar_chart %}
+                        {{ radar_chart|safe }}
+                    {% else %}
+                        <div class="alert alert-warning">Radar chart not available</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Area Data -->
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h4 style="color: var(--primary-color);">📋 Complete Area Analysis Data</h4>
+                    
+                    <ul class="nav nav-tabs mb-4" id="analysisTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="sustainability-tab" data-bs-toggle="tab" data-bs-target="#sustainability" type="button" role="tab">
+                                🌱 Sustainability
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="environment-tab" data-bs-toggle="tab" data-bs-target="#environment" type="button" role="tab">
+                                🌳 Environment
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="infrastructure-tab" data-bs-toggle="tab" data-bs-target="#infrastructure" type="button" role="tab">
+                                🏗️ Infrastructure
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="satellite-tab" data-bs-toggle="tab" data-bs-target="#satellite" type="button" role="tab">
+                                🛰️ Satellite Data
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="analysisTabsContent">
+                        <!-- Sustainability Tab -->
+                        <div class="tab-pane fade show active" id="sustainability" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead style="background-color: var(--primary-color); color: white;">
+                                        <tr>
+                                            <th>Area</th>
+                                            <th>Overall Score</th>
+                                            <th>Transport</th>
+                                            <th>Energy</th>
+                                            <th>Pollution</th>
+                                            <th>Status</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for stats in area_stats %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ stats.name }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ stats.type }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="metric-value">{{ "%.1f"|format(stats.sustainability_score) }}</div>
+                                                <small>/100</small>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold" style="color: var(--primary-color);">
+                                                    {{ "%.1f"|format(stats.transport_index) }}
+                                                </span>
+                                                <small>/10</small>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold" style="color: var(--primary-color);">
+                                                    {{ "%.1f"|format(stats.energy_index) }}
+                                                </span>
+                                                <small>/10</small>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold" style="color: #E74C3C;">
+                                                    {{ "%.1f"|format(stats.pollution_index) }}
+                                                </span>
+                                                <small>/10</small>
+                                            </td>
+                                            <td>
+                                                {% if stats.sustainability_score >= 70 %}
+                                                <span class="badge bg-success">Excellent</span>
+                                                {% elif stats.sustainability_score >= 50 %}
+                                                <span class="badge bg-warning">Good</span>
+                                                {% else %}
+                                                <span class="badge bg-danger">Needs Improvement</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('area_analysis', area_key=stats.key) }}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    View Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Environment Tab -->
+                        <div class="tab-pane fade" id="environment" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead style="background-color: var(--primary-color); color: white;">
+                                        <tr>
+                                            <th>Area</th>
+                                            <th>Vegetation Index</th>
+                                            <th>Green Cover</th>
+                                            <th>Temperature</th>
+                                            <th>Urban Heat</th>
+                                            <th>Air Quality</th>
+                                            <th>Health Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for stats in area_stats %}
+                                        {% set area_data = data[stats.key] %}
+                                        <tr>
+                                            <td><strong>{{ stats.name }}</strong></td>
+                                            <td>
+                                                <span class="fw-bold" style="color: #27AE60;">
+                                                    {{ "%.3f"|format(stats.vegetation_index) }}
+                                                </span>
+                                            </td>
+                                            <td>{{ area_data.green_cover }}%</td>
+                                            <td>{{ "%.1f"|format(area_data.temperature) }}°C</td>
+                                            <td>+{{ "%.1f"|format(area_data.urban_heat_intensity) }}°C</td>
+                                            <td>
+                                                {% if area_data.pollution_index <= 3 %}
+                                                <span class="badge bg-success">Good</span>
+                                                {% elif area_data.pollution_index <= 6 %}
+                                                <span class="badge bg-warning">Moderate</span>
+                                                {% else %}
+                                                <span class="badge bg-danger">Poor</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ area_data.vegetation_health }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure Tab -->
+                        <div class="tab-pane fade" id="infrastructure" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead style="background-color: var(--primary-color); color: white;">
+                                        <tr>
+                                            <th>Area</th>
+                                            <th>Population Density</th>
+                                            <th>Solar Potential</th>
+                                            <th>Grid Dependency</th>
+                                            <th>Renewable %</th>
+                                            <th>Transport Modes</th>
+                                            <th>Capacity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for stats in area_stats %}
+                                        {% set area_data = data[stats.key] %}
+                                        <tr>
+                                            <td><strong>{{ stats.name }}</strong></td>
+                                            <td>{{ area_data.population_density }}/km²</td>
+                                            <td>
+                                                <span class="fw-bold" style="color: #FF6B35;">
+                                                    {{ "%.1f"|format(area_data.solar_potential) }} kWh/m²
+                                                </span>
+                                            </td>
+                                            <td>{{ area_data.grid_dependency }}%</td>
+                                            <td>{{ area_data.solar_percentage }}%</td>
+                                            <td>
+                                                {% set transport = area_data.transportation_breakdown %}
+                                                Public: {{ transport.public_transport }}%
+                                            </td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if area_data.renewable_capacity == 'Excellent' %}bg-success
+                                                    {% elif area_data.renewable_capacity == 'High' %}bg-primary
+                                                    {% else %}bg-warning{% endif %}">
+                                                    {{ area_data.renewable_capacity }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Satellite Data Tab -->
+                        <div class="tab-pane fade" id="satellite" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead style="background-color: var(--primary-color); color: white;">
+                                        <tr>
+                                            <th>Area</th>
+                                            <th>NDVI</th>
+                                            <th>EVI</th>
+                                            <th>Land Cover</th>
+                                            <th>Urbanization</th>
+                                            <th>Data Source</th>
+                                            <th>Image Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for stats in area_stats %}
+                                        {% set area_data = data[stats.key] %}
+                                        <tr>
+                                            <td><strong>{{ stats.name }}</strong></td>
+                                            <td>{{ "%.3f"|format(area_data.modis_vegetation.ndvi) }}</td>
+                                            <td>{{ "%.3f"|format(area_data.modis_vegetation.evi) }}</td>
+                                            <td>{{ area_data.modis_land_cover.land_cover_type }}</td>
+                                            <td>{{ area_data.urbanization_level }}</td>
+                                            <td>{{ area_data.modis_vegetation.source }}</td>
+                                            <td>{{ area_data.landsat_metadata.acquisition_date }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mt-4 mb-5">
+            <div class="col-12 text-center">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary me-2">
+                    ← Back to Dashboard
+                </a>
+                <a href="{{ url_for('satellite_analysis') }}" class="btn btn-primary me-2">
+                    View Satellite Data →
+                </a>
+                <a href="{{ url_for('download_csv') }}" class="btn btn-success">
+                    📥 Download Complete Dataset
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 style="color: white;">🌌 NASA Hackathon Project</h5>
+                    <p>Comprehensive Urban Sustainability Analysis</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2025 NASA Space Apps Challenge<br>
+                    Bhopal Urban Planning Initiative</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
