@@ -1,0 +1,175 @@
+{
+  "old_bhopal": {
+    "name": "Old Bhopal",
+    "type": "Mixed Use",
+    "temperature": 35.8,
+    "population_density": 12000,
+    "green_cover": 15.0,
+    "pollution_index": 82,
+    "energy_consumption": {
+      "grid_electricity": 72,
+      "solar_energy": 15,
+      "battery_storage": 8,
+      "generator_backup": 5
+    },
+    "transportation": {
+      "private_vehicles": 45,
+      "public_transport": 30,
+      "two_wheelers": 15,
+      "walking_cycling": 10
+    },
+    "key_concerns": [
+      "High density",
+      "Low green cover",
+      "Traffic congestion",
+      "Air pollution"
+    ]
+  },
+  "new_bhopal": {
+    "name": "New Bhopal",
+    "type": "Residential/Commercial",
+    "temperature": 32.5,
+    "population_density": 8500,
+    "green_cover": 28.0,
+    "pollution_index": 56,
+    "energy_consumption": {
+      "grid_electricity": 65,
+      "solar_energy": 22,
+      "battery_storage": 10,
+      "generator_backup": 3
+    },
+    "transportation": {
+      "private_vehicles": 40,
+      "public_transport": 35,
+      "two_wheelers": 15,
+      "walking_cycling": 10
+    },
+    "key_concerns": [
+      "Moderate pollution",
+      "Infrastructure development",
+      "Waste management"
+    ]
+  },
+  "shahpura": {
+    "name": "Shahpura",
+    "type": "Residential",
+    "temperature": 33.2,
+    "population_density": 9200,
+    "green_cover": 22.5,
+    "pollution_index": 68,
+    "energy_consumption": {
+      "grid_electricity": 70,
+      "solar_energy": 18,
+      "battery_storage": 8,
+      "generator_backup": 4
+    },
+    "transportation": {
+      "private_vehicles": 42,
+      "public_transport": 32,
+      "two_wheelers": 16,
+      "walking_cycling": 10
+    },
+    "key_concerns": [
+      "Water scarcity",
+      "Traffic congestion",
+      "Air pollution"
+    ]
+  },
+  "kolar": {
+    "name": "Kolar",
+    "type": "Suburban/Residential",
+    "temperature": 31.8,
+    "population_density": 6500,
+    "green_cover": 35.0,
+    "pollution_index": 48,
+    "energy_consumption": {
+      "grid_electricity": 60,
+      "solar_energy": 28,
+      "battery_storage": 9,
+      "generator_backup": 3
+    },
+    "transportation": {
+      "private_vehicles": 38,
+      "public_transport": 38,
+      "two_wheelers": 14,
+      "walking_cycling": 10
+    },
+    "key_concerns": [
+      "Urban sprawl",
+      "Public transport connectivity"
+    ]
+  },
+  "indrapuri": {
+    "name": "Indrapuri",
+    "type": "Residential",
+    "temperature": 32.0,
+    "population_density": 7800,
+    "green_cover": 30.5,
+    "pollution_index": 52,
+    "energy_consumption": {
+      "grid_electricity": 62,
+      "solar_energy": 25,
+      "battery_storage": 10,
+      "generator_backup": 3
+    },
+    "transportation": {
+      "private_vehicles": 35,
+      "public_transport": 40,
+      "two_wheelers": 15,
+      "walking_cycling": 10
+    },
+    "key_concerns": [
+      "Parking issues",
+      "Waste management"
+    ]
+  },
+  "bhopal_lake": {
+    "name": "Bhopal Lake Area",
+    "type": "Recreational/Residential",
+    "temperature": 30.2,
+    "population_density": 5200,
+    "green_cover": 40.5,
+    "pollution_index": 32,
+    "energy_consumption": {
+      "grid_electricity": 55,
+      "solar_energy": 35,
+      "battery_storage": 8,
+      "generator_backup": 2
+    },
+    "transportation": {
+      "private_vehicles": 30,
+      "public_transport": 45,
+      "two_wheelers": 10,
+      "walking_cycling": 15
+    },
+    "key_concerns": [
+      "Lake conservation",
+      "Tourist management"
+    ]
+  },
+  "industrial_area": {
+    "name": "Industrial Area",
+    "type": "Industrial",
+    "temperature": 37.5,
+    "population_density": 3800,
+    "green_cover": 12.5,
+    "pollution_index": 95,
+    "energy_consumption": {
+      "grid_electricity": 80,
+      "solar_energy": 8,
+      "battery_storage": 5,
+      "generator_backup": 7
+    },
+    "transportation": {
+      "private_vehicles": 50,
+      "public_transport": 25,
+      "two_wheelers": 15,
+      "walking_cycling": 10
+    },
+    "key_concerns": [
+      "Severe pollution",
+      "Industrial waste",
+      "Worker safety"
+    ]
+  }
+}

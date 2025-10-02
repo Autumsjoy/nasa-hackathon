@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ area_data.name }} - Bhopal Urban Planning</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2E8B57;
+            --secondary: #FF7F50;
+            --accent: #20B2AA;
+            --dark: #2F4F4F;
+            --light: #F5F5F5;
+            --success: #32CD32;
+            --warning: #FFA500;
+            --danger: #DC143C;
+            --info: #4682B4;
+        }
+        
+        .nav-custom {
+            background: linear-gradient(135deg, var(--dark), var(--primary)) !important;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--dark), var(--primary));
+            color: white;
+            padding: 100px 0 50px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 4px solid var(--primary);
+            margin-bottom: 2rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .card-custom {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .card-header-custom {
+            background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+        }
+        
+        .progress {
+            height: 10px;
+            border-radius: 10px;
+        }
+        
+        .badge-custom {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .section-title {
+            color: var(--dark);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark nav-custom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-city me-2"></i>
+                Bhopal Urban Planning
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+                <a class="nav-link" href="/heatmaps">Heat Maps</a>
+                <a class="nav-link" href="/satellite">Satellite Data</a>
+                <a class="nav-link" href="/analysis">Analysis</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/" class="text-white">Home</a></li>
+                            <li class="breadcrumb-item active text-white">{{ area_data.name }}</li>
+                        </ol>
+                    </nav>
+                    <h1 class="display-5 fw-bold mb-3">{{ area_data.name }}</h1>
+                    <p class="lead mb-4">{{ area_data.type }} • Population Density: {{ area_data.population_density }} per km²</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <span class="badge bg-success fs-6 px-3 py-2">
+                            <i class="fas fa-leaf me-2"></i>Sustainability Score: {{ "%.1f"|format(area_data.sustainability_score) }}
+                        </span>
+                        <span class="badge bg-info fs-6 px-3 py-2">
+                            <i class="fas fa-tree me-2"></i>Green Cover: {{ area_data.green_cover }}%
+                        </span>
+                        <span class="badge bg-warning fs-6 px-3 py-2">
+                            <i class="fas fa-thermometer-half me-2"></i>Temperature: {{ area_data.temperature }}°C
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ "%.1f"|format(area_data.sustainability_score) }}</div>
+                        <h5>Overall Score</h5>
+                        <div class="progress">
+                            <div class="progress-bar" 
+                                 style="width: {{ area_data.sustainability_score }}%; background: var(--primary);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container-fluid py-5">
+        <div class="container">
+            <!-- Key Metrics -->
+            <div class="row mb-5">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ "%.1f"|format(area_data.transport_index) }}</div>
+                        <h5>Transport Index</h5>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ area_data.transport_index }}%; background: var(--primary);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ "%.1f"|format(area_data.pollution_index) }}</div>
+                        <h5>Pollution Index</h5>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ area_data.pollution_index }}%; background: var(--danger);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ "%.1f"|format(area_data.energy_index) }}</div>
+                        <h5>Energy Index</h5>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ area_data.energy_index }}%; background: var(--success);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ "%.1f"|format(area_data.vegetation_index) }}</div>
+                        <h5>Vegetation Index</h5>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ area_data.vegetation_index * 100 }}%; background: var(--accent);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-pie me-2"></i>Sustainability Metrics
+                            </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="{{ sustainability_chart }}" alt="Sustainability Chart" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-radar me-2"></i>Area Profile
+                            </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="{{ radar_chart }}" alt="Radar Chart" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breakdown Charts -->
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-bolt me-2"></i>Energy Consumption
+                            </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="{{ energy_chart }}" alt="Energy Chart" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-bus me-2"></i>Transportation Modes
+                            </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="{{ transport_chart }}" alt="Transport Chart" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NASA Data Section -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-satellite me-2"></i>NASA Satellite Data
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">MODIS Data</h6>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Vegetation Index (NDVI):</span>
+                                            <strong>{{ "%.3f"|format(area_data.modis_vegetation.ndvi) }}</strong>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Enhanced Vegetation Index:</span>
+                                            <strong>{{ "%.3f"|format(area_data.modis_vegetation.evi) }}</strong>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Land Cover Type:</span>
+                                            <strong>{{ area_data.modis_land_cover.land_cover_type }}</strong>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Land Surface Temperature:</span>
+                                            <strong>{{ area_data.modis_temperature.daytime_temperature }}°C</strong>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">Landsat Data</h6>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Urbanization Index (NDBI):</span>
+                                            <strong>{{ "%.3f"|format(area_data.landsat_indices.ndbi) }}</strong>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Urbanization Level:</span>
+                                            <strong>{{ area_data.landsat_indices.urbanization_level }}</strong>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Vegetation Health:</span>
+                                            <strong>{{ area_data.landsat_indices.vegetation_health }}</strong>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>Data Source:</span>
+                                            <strong>{{ area_data.landsat_metadata.satellite }}</strong>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Concerns -->
+            {% if area_data.key_concerns %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Key Urban Planning Concerns
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for concern in area_data.key_concerns %}
+                                <div class="col-md-6 mb-2">
+                                    <div class="alert alert-warning d-flex align-items-center">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        {{ concern }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

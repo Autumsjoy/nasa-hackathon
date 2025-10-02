@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Satellite Maps - Bhopal Urban Planning</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #50589C;
+            --secondary: #7A6FBE;
+            --accent: #FF6B6B;
+            --dark: #2D3748;
+            --light: #F7FAFC;
+        }
+        
+        .nav-custom {
+            background: linear-gradient(135deg, var(--dark), var(--primary)) !important;
+        }
+        
+        #cesiumContainer {
+            width: 100%;
+            height: 600px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .control-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            color: var(--dark);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+        }
+        
+        .btn-cesium {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cesium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(80, 88, 156, 0.4);
+            color: white;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark nav-custom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-city me-2"></i>
+                Bhopal Urban Planning
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+                <a class="nav-link active" href="/satellite">3D Maps</a>
+                <a class="nav-link" href="/heatmaps">Heat Maps</a>
+                <a class="nav-link" href="/analysis">Analysis</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-5 mt-4">
+        <div class="container">
+            <h1 class="section-title">3D Satellite Mapping</h1>
+            <p class="lead mb-4">
+                Explore Bhopal in stunning 3D with real-time satellite imagery and terrain data powered by Cesium JS.
+            </p>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5><i class="fas fa-sliders-h me-2"></i>Map Controls</h5>
+                        <p class="text-muted mb-0">Switch between different satellite layers and visualization modes</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-cesium" onclick="switchToSatellite()">
+                            <i class="fas fa-satellite me-2"></i>Satellite View
+                        </button>
+                        <button class="btn btn-cesium" onclick="switchToTerrain()">
+                            <i class="fas fa-mountain me-2"></i>Terrain View
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cesium Container -->
+            <div id="cesiumContainer"></div>
+
+            <!-- Area Information -->
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h6><i class="fas fa-info-circle me-2" style="color: var(--primary);"></i>About 3D Mapping</h6>
+                        <p class="mb-0">This 3D visualization uses Cesium JS with NASA satellite data to provide interactive urban planning insights.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <h6><i class="fas fa-database me-2" style="color: var(--primary);"></i>Data Sources</h6>
+                        <p class="mb-0">Sentinel-2 imagery, MODIS vegetation data, Landsat urban analysis, and digital elevation models.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="control-panel">
+                        <h5><i class="fas fa-palette me-2"></i>Map Legend</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div style="width: 20px; height: 20px; background: #48BB78; border-radius: 50%; margin-right: 10px;"></
