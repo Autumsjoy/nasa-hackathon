@@ -3,70 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ area_name }} - Detailed Analysis | NASA Hackathon</title>
+    <title>{{ area_name }} - Detailed Analysis | NASA Hackathon 2025</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         :root {
             --primary-color: #50589C;
             --primary-light: #6A72B0;
             --primary-dark: #404780;
+            --secondary-color: #FF6B35;
+            --accent-color: #4ECDC4;
+            --dark-color: #2C3E50;
+            --light-color: #F8F9FA;
+            --success-color: #27AE60;
+            --warning-color: #E67E22;
+            --danger-color: #E74C3C;
+            --info-color: #3498DB;
         }
+        
+        body {
+            background-color: var(--light-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         .analysis-header {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
             padding: 40px 0;
             margin-bottom: 30px;
         }
+        
         .metric-card {
             border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(80, 88, 156, 0.1);
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(80, 88, 156, 0.15);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
         }
+        
         .metric-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(80, 88, 156, 0.25);
         }
+        
         .metric-value {
             font-size: 2.5rem;
             font-weight: bold;
             color: var(--primary-color);
         }
+        
         .chart-container {
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: 1px solid rgba(80, 88, 156, 0.1);
         }
+        
         .area-nav {
-            background: var(--primary-color);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .area-nav select {
             background: white;
-            border: 2px solid var(--primary-light);
-            border-radius: 5px;
-            padding: 8px 15px;
-            color: var(--primary-dark);
-            font-weight: 500;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color);
+        }
+        
+        .nav-pills .nav-link {
+            color: var(--primary-color);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        
+        .progress {
+            height: 8px;
+            margin-top: 8px;
+        }
+        
+        .progress-bar {
+            background-color: var(--primary-color);
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .performance-badge {
+            font-size: 0.8rem;
+            padding: 4px 8px;
         }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}" style="color: #50589C;">
-                🌌 NASA Urban Planning
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}" style="color: var(--primary-color);">
+                <i class="fas fa-satellite me-2"></i>NASA Urban Planning
             </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="{{ url_for('index') }}">Home</a>
-                <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
-                <a class="nav-link active" href="{{ url_for('area_analysis', area_key=area_key) }}">{{ area_name }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
+                    <a class="nav-link" href="{{ url_for('satellite_analysis') }}">Satellite</a>
+                    <a class="nav-link" href="{{ url_for('heatmaps') }}">Heat Maps</a>
+                    <a class="nav-link" href="{{ url_for('satellite_3d') }}">3D Map</a>
+                </div>
             </div>
         </div>
     </nav>
@@ -77,7 +145,8 @@
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <h1 class="display-5 fw-bold">{{ area_name }}</h1>
-                    <p class="lead mb-0">Detailed Sustainability Analysis</p>
+                    <p class="lead mb-0">Comprehensive Sustainability Analysis & Urban Planning Insights</p>
+                    <small>Area Type: {{ area_data.type }} | Population Density: {{ area_data.population_density }}/km²</small>
                 </div>
                 <div class="col-md-4 text-end">
                     <div class="area-nav">
@@ -89,6 +158,11 @@
                             </option>
                             {% endfor %}
                         </select>
+                        <div class="mt-2 text-center">
+                            <span class="badge bg-{% if area_data.sustainability_score >= 70 %}success{% elif area_data.sustainability_score >= 50 %}warning{% else %}danger{% endif %}">
+                                Overall Score: {{ "%.1f"|format(area_data.sustainability_score) }}/100
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -99,177 +173,659 @@
         <!-- Quick Stats -->
         <div class="row mb-4">
             <div class="col-md-3">
-                <div class="card metric-card text-center">
-                    <div class="card-body">
+                <div class="card metric-card">
+                    <div class="card-body text-center">
                         <h5 class="card-title text-muted">Sustainability Score</h5>
-                        <div class="metric-value">{{ area_data.sustainability_score }}/100</div>
-                        <small class="text-muted">Overall Rating</small>
+                        <div class="metric-value">{{ "%.1f"|format(area_data.sustainability_score) }}</div>
+                        <small class="text-muted">Overall Rating /100</small>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ area_data.sustainability_score }}%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card metric-card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title text-muted">Transport Index</h5>
-                        <div class="metric-value">{{ area_data.transport_index }}/10</div>
-                        <small class="text-muted">Mobility Score</small>
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-muted">Transport Efficiency</h5>
+                        <div class="metric-value">{{ "%.1f"|format(area_data.transport_index) }}</div>
+                        <small class="text-muted">Performance Index /10</small>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ area_data.transport_index * 10 }}%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card metric-card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title text-muted">Energy Index</h5>
-                        <div class="metric-value">{{ area_data.energy_index }}/10</div>
-                        <small class="text-muted">Power Efficiency</small>
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-muted">Energy Performance</h5>
+                        <div class="metric-value">{{ "%.1f"|format(area_data.energy_index) }}</div>
+                        <small class="text-muted">Efficiency Index /10</small>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ area_data.energy_index * 10 }}%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card metric-card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title text-muted">Pollution Index</h5>
-                        <div class="metric-value">{{ area_data.pollution_index }}/10</div>
-                        <small class="text-muted">Lower is Better</small>
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-muted">Environmental Quality</h5>
+                        <div class="metric-value">{{ "%.1f"|format(10 - area_data.pollution_index) }}</div>
+                        <small class="text-muted">Pollution Control /10</small>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ (10 - area_data.pollution_index) * 10 }}%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Row 1 -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="chart-container">
-                    <h4 style="color: #50589C;">Sustainability Metrics</h4>
-                    <img src="{{ sustainability_chart }}" alt="Sustainability Chart" class="img-fluid">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="chart-container">
-                    <h4 style="color: #50589C;">Radar Analysis</h4>
-                    <img src="{{ radar_chart }}" alt="Radar Chart" class="img-fluid">
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Row 2 -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="chart-container">
-                    <h4 style="color: #50589C;">Energy Breakdown</h4>
-                    <img src="{{ energy_chart }}" alt="Energy Chart" class="img-fluid">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="chart-container">
-                    <h4 style="color: #50589C;">Transportation Analysis</h4>
-                    <img src="{{ transport_chart }}" alt="Transport Chart" class="img-fluid">
-                </div>
-            </div>
-        </div>
-
-        <!-- Area Comparison -->
+        <!-- Main Analysis Tabs -->
         <div class="row">
             <div class="col-12">
-                <div class="chart-container">
-                    <h4 style="color: #50589C;">Comparison with Other Areas</h4>
-                    <img src="{{ comparison_chart }}" alt="Comparison Chart" class="img-fluid">
-                </div>
-            </div>
-        </div>
+                <ul class="nav nav-pills mb-4 justify-content-center" id="analysisTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                            <i class="fas fa-chart-bar me-2"></i>Overview
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="sustainability-tab" data-bs-toggle="tab" data-bs-target="#sustainability" type="button" role="tab">
+                            <i class="fas fa-leaf me-2"></i>Sustainability
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="energy-tab" data-bs-toggle="tab" data-bs-target="#energy" type="button" role="tab">
+                            <i class="fas fa-bolt me-2"></i>Energy
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="transport-tab" data-bs-toggle="tab" data-bs-target="#transport" type="button" role="tab">
+                            <i class="fas fa-car me-2"></i>Transport
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison" type="button" role="tab">
+                            <i class="fas fa-chart-line me-2"></i>Comparison
+                        </button>
+                    </li>
+                </ul>
 
-        <!-- Detailed Information -->
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header" style="background-color: #50589C; color: white;">
-                        <h5 class="mb-0">Environmental Data</h5>
+                <div class="tab-content" id="analysisTabsContent">
+                    
+                    <!-- Overview Tab -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <!-- Radar Chart -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="chart-container">
+                                    <h4 style="color: var(--primary-color);">
+                                        <i class="fas fa-radar me-2"></i>Comprehensive Area Analysis - Radar Chart
+                                    </h4>
+                                    {% if radar_chart %}
+                                        {{ radar_chart|safe }}
+                                    {% else %}
+                                        <div class="alert alert-warning">Radar chart not available</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key Metrics Summary -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <h5 style="color: var(--primary-color);">📊 Sustainability Metrics</h5>
+                                    {% if sustainability_chart %}
+                                        {{ sustainability_chart|safe }}
+                                    {% else %}
+                                        <div class="alert alert-warning">Sustainability chart not available</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <h5 style="color: var(--primary-color);">🔄 Area Comparison</h5>
+                                    {% if comparison_chart %}
+                                        {{ comparison_chart|safe }}
+                                    {% else %}
+                                        <div class="alert alert-warning">Comparison chart not available</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Area Details Card -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card metric-card">
+                                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
+                                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Area Profile & Characteristics</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>📍 Basic Information</h6>
+                                                <table class="table table-sm">
+                                                    <tr>
+                                                        <td><strong>Area Name:</strong></td>
+                                                        <td>{{ area_data.name }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Area Type:</strong></td>
+                                                        <td><span class="badge bg-secondary">{{ area_data.type }}</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Population Density:</strong></td>
+                                                        <td>{{ area_data.population_density }} people/km²</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Green Cover:</strong></td>
+                                                        <td>{{ area_data.green_cover }}%</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>🌡️ Environmental Data</h6>
+                                                <table class="table table-sm">
+                                                    <tr>
+                                                        <td><strong>Temperature:</strong></td>
+                                                        <td>{{ "%.1f"|format(area_data.temperature) }}°C</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Urban Heat Intensity:</strong></td>
+                                                        <td>+{{ "%.1f"|format(area_data.urban_heat_intensity) }}°C</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Vegetation Health:</strong></td>
+                                                        <td>
+                                                            <span class="badge 
+                                                                {% if area_data.vegetation_health == 'Excellent' %}bg-success
+                                                                {% elif area_data.vegetation_health == 'Good' %}bg-primary
+                                                                {% elif area_data.vegetation_health == 'Moderate' %}bg-warning
+                                                                {% else %}bg-danger{% endif %}">
+                                                                {{ area_data.vegetation_health }}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Solar Potential:</strong></td>
+                                                        <td>{{ "%.1f"|format(area_data.solar_potential) }} kWh/m²/day</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <table class="table">
-                            <tr>
-                                <td><strong>Vegetation Index:</strong></td>
-                                <td>{{ "%.2f"|format(area_data.vegetation_index) }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Urbanization Level:</strong></td>
-                                <td>{{ area_data.urbanization_level }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Green Cover:</strong></td>
-                                <td>{{ area_data.green_cover }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Solar Potential:</strong></td>
-                                <td>{{ area_data.solar_potential }}</td>
-                            </tr>
-                        </table>
+
+                    <!-- Sustainability Tab -->
+                    <div class="tab-pane fade" id="sustainability" role="tabpanel">
+                        <!-- Sustainability Metrics Details -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card shadow-sm">
+                                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
+                                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Sustainability Metrics Explained</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 style="color: var(--primary-color);">🌱 Core Sustainability Indicators</h6>
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Metric</th>
+                                                                <th>Description</th>
+                                                                <th>Weight</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td><strong>Transport Index</strong></td>
+                                                                <td>Measures public transit usage, walkability, and traffic efficiency</td>
+                                                                <td>25%</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Energy Index</strong></td>
+                                                                <td>Evaluates renewable energy adoption and grid efficiency</td>
+                                                                <td>30%</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Pollution Control</strong></td>
+                                                                <td>Assesses air quality, waste management, and emissions</td>
+                                                                <td>35%</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Green Infrastructure</strong></td>
+                                                                <td>Measures vegetation cover and urban green spaces</td>
+                                                                <td>10%</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 style="color: var(--primary-color);">📈 Scoring Methodology</h6>
+                                                <div class="alert alert-info">
+                                                    <strong>Overall Sustainability Score =</strong><br>
+                                                    (Transport × 0.25) + (Energy × 0.30) + (Pollution Control × 0.35) + (Green Infrastructure × 0.10)
+                                                </div>
+                                                <div class="progress mb-2" style="height: 20px;">
+                                                    <div class="progress-bar" style="width: 25%; background-color: var(--primary-color);">Transport 25%</div>
+                                                    <div class="progress-bar" style="width: 30%; background-color: var(--accent-color);">Energy 30%</div>
+                                                    <div class="progress-bar" style="width: 35%; background-color: var(--secondary-color);">Pollution 35%</div>
+                                                    <div class="progress-bar" style="width: 10%; background-color: var(--success-color);">Green 10%</div>
+                                                </div>
+                                                <small class="text-muted">
+                                                    <strong>Data Sources:</strong> NASA Landsat NDVI, MODIS temperature, transportation surveys, energy consumption data
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Indicators -->
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h1 style="color: var(--primary-color);">{{ "%.1f"|format(area_data.transport_index) }}</h1>
+                                        <h6>Transport Score</h6>
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width: {{ area_data.transport_index * 10 }}%"></div>
+                                        </div>
+                                        <small class="text-muted">/10 points</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h1 style="color: var(--accent-color);">{{ "%.1f"|format(area_data.energy_index) }}</h1>
+                                        <h6>Energy Score</h6>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-accent" style="width: {{ area_data.energy_index * 10 }}%"></div>
+                                        </div>
+                                        <small class="text-muted">/10 points</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h1 style="color: var(--secondary-color);">{{ "%.1f"|format(10 - area_data.pollution_index) }}</h1>
+                                        <h6>Environment Score</h6>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-warning" style="width: {{ (10 - area_data.pollution_index) * 10 }}%"></div>
+                                        </div>
+                                        <small class="text-muted">/10 points</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header" style="background-color: #50589C; color: white;">
-                        <h5 class="mb-0">Infrastructure Data</h5>
+
+                    <!-- Energy Tab -->
+                    <div class="tab-pane fade" id="energy" role="tabpanel">
+                        <!-- Energy Breakdown Chart -->
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="chart-container">
+                                    <h4 style="color: var(--primary-color);">
+                                        <i class="fas fa-bolt me-2"></i>Energy Source Distribution
+                                    </h4>
+                                    {% if energy_chart %}
+                                        {{ energy_chart|safe }}
+                                    {% else %}
+                                        <div class="alert alert-warning">Energy breakdown chart not available</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="chart-container">
+                                    <h5 style="color: var(--primary-color);">🌞 Solar Potential</h5>
+                                    <div class="text-center">
+                                        <h1 style="color: var(--warning-color);">{{ "%.1f"|format(area_data.solar_potential) }}</h1>
+                                        <p class="lead">kWh/m²/day</p>
+                                        <div class="progress mb-3">
+                                            <div class="progress-bar bg-warning" style="width: {{ (area_data.solar_potential / 8) * 100 }}%"></div>
+                                        </div>
+                                        <p>
+                                            <span class="badge bg-{% if area_data.renewable_capacity == 'Excellent' %}success{% elif area_data.renewable_capacity == 'High' %}primary{% else %}warning{% endif %}">
+                                                {{ area_data.renewable_capacity }} Potential
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Energy Analysis Details -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card shadow-sm">
+                                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
+                                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Energy Consumption Analysis</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 style="color: var(--primary-color);">Energy Source Distribution</h6>
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered">
+                                                        <thead style="background-color: #f8f9fa;">
+                                                            <tr>
+                                                                <th>Energy Source</th>
+                                                                <th>Percentage</th>
+                                                                <th>Status</th>
+                                                                <th>Carbon Impact</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>🟡 Solar Energy</td>
+                                                                <td>{{ area_data.energy_breakdown.solar_energy }}%</td>
+                                                                <td>
+                                                                    {% if area_data.energy_breakdown.solar_energy >= 25 %}
+                                                                    <span class="badge bg-success">Excellent</span>
+                                                                    {% elif area_data.energy_breakdown.solar_energy >= 15 %}
+                                                                    <span class="badge bg-warning">Good</span>
+                                                                    {% else %}
+                                                                    <span class="badge bg-danger">Needs Improvement</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="text-success">Zero Emission</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>🔵 Grid Electricity</td>
+                                                                <td>{{ area_data.energy_breakdown.grid_electricity }}%</td>
+                                                                <td>
+                                                                    {% if area_data.energy_breakdown.grid_electricity <= 50 %}
+                                                                    <span class="badge bg-success">Low Dependency</span>
+                                                                    {% else %}
+                                                                    <span class="badge bg-warning">High Dependency</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="text-warning">Medium Emission</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>🟢 Battery Storage</td>
+                                                                <td>{{ area_data.energy_breakdown.battery_storage }}%</td>
+                                                                <td><span class="badge bg-info">Storage</span></td>
+                                                                <td class="text-success">Zero Emission</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>🔴 Generator Backup</td>
+                                                                <td>{{ area_data.energy_breakdown.generator_backup }}%</td>
+                                                                <td><span class="badge bg-danger">High Emission</span></td>
+                                                                <td class="text-danger">High Emission</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6">
+                                                <h6 style="color: var(--primary-color);">📈 Improvement Recommendations</h6>
+                                                <div class="list-group">
+                                                    {% if area_data.solar_percentage < 30 %}
+                                                    <div class="list-group-item list-group-item-warning">
+                                                        <strong>Increase Solar Adoption:</strong> Consider rooftop solar installations
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if area_data.energy_breakdown.grid_electricity > 70 %}
+                                                    <div class="list-group-item list-group-item-danger">
+                                                        <strong>Reduce Grid Dependency:</strong> Explore microgrid solutions
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if area_data.energy_breakdown.generator_backup > 5 %}
+                                                    <div class="list-group-item list-group-item-info">
+                                                        <strong>Optimize Backup Power:</strong> Upgrade to cleaner backup solutions
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+
+                                                <h6 class="mt-4">🎯 Key Performance Indicators</h6>
+                                                <div class="row text-center mt-3">
+                                                    <div class="col-6">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <h4 style="color: var(--success-color);">{{ area_data.solar_percentage }}%</h4>
+                                                                <small>Renewable Energy</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <h4 style="color: var(--warning-color);">{{ area_data.grid_dependency }}%</h4>
+                                                                <small>Grid Dependency</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <table class="table">
-                            <tr>
-                                <td><strong>Area Type:</strong></td>
-                                <td>{{ area_data.type }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Population Density:</strong></td>
-                                <td>{{ area_data.population_density }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Grid Dependency:</strong></td>
-                                <td>{{ area_data.grid_dependency }}%</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Solar Percentage:</strong></td>
-                                <td>{{ area_data.solar_percentage }}%</td>
-                            </tr>
-                        </table>
+
+                    <!-- Transport Tab -->
+                    <div class="tab-pane fade" id="transport" role="tabpanel">
+                        <!-- Transportation Chart -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="chart-container">
+                                    <h4 style="color: var(--primary-color);">
+                                        <i class="fas fa-car me-2"></i>Transportation Mode Distribution
+                                    </h4>
+                                    {% if transport_chart %}
+                                        {{ transport_chart|safe }}
+                                    {% else %}
+                                        <div class="alert alert-warning">Transportation chart not available</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transportation Analysis Details -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card shadow-sm">
+                                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
+                                        <h5 class="mb-0"><i class="fas fa-traffic-light me-2"></i>Transportation & Mobility Analysis</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 style="color: var(--primary-color);">Mobility Pattern Analysis</h6>
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered">
+                                                        <thead style="background-color: #f8f9fa;">
+                                                            <tr>
+                                                                <th>Transport Mode</th>
+                                                                <th>Usage %</th>
+                                                                <th>Sustainability</th>
+                                                                <th>Carbon Footprint</th>
+                                                                <th>Efficiency</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>🚌 Public Transit</td>
+                                                                <td>{{ area_data.transportation_breakdown.public_transport }}%</td>
+                                                                <td>
+                                                                    {% if area_data.transportation_breakdown.public_transport >= 35 %}
+                                                                    <span class="badge bg-success">High</span>
+                                                                    {% else %}
+                                                                    <span class="badge bg-warning">Medium</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="text-success">Low</td>
+                                                                <td>⭐⭐⭐⭐⭐</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>🚗 Private Vehicles</td>
+                                                                <td>{{ area_data.transportation_breakdown.private_vehicles }}%</td>
+                                                                <td>
+                                                                    {% if area_data.transportation_breakdown.private_vehicles <= 35 %}
+                                                                    <span class="badge bg-success">Good</span>
+                                                                    {% else %}
+                                                                    <span class="badge bg-danger">Poor</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="text-danger">High</td>
+                                                                <td>⭐⭐</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>🚲 Walking/Cycling</td>
+                                                                <td>{{ area_data.transportation_breakdown.walking_cycling }}%</td>
+                                                                <td><span class="badge bg-success">Excellent</span></td>
+                                                                <td class="text-success">Zero</td>
+                                                                <td>⭐⭐⭐⭐⭐</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>🏍️ Two Wheelers</td>
+                                                                <td>{{ area_data.transportation_breakdown.two_wheelers }}%</td>
+                                                                <td><span class="badge bg-warning">Medium</span></td>
+                                                                <td class="text-warning">Medium</td>
+                                                                <td>⭐⭐⭐</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6">
+                                                <h6 style="color: var(--primary-color);">🚦 Traffic & Infrastructure Metrics</h6>
+                                                <div class="row text-center mb-3">
+                                                    <div class="col-6">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <h3 style="color: var(--primary-color);">{{ area_data.transport_index }}/10</h3>
+                                                                <small>Transport Efficiency Score</small>
+                                                                <div class="progress mt-2">
+                                                                    <div class="progress-bar" style="width: {{ area_data.transport_index * 10 }}%"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <h3 style="color: var(--success-color);">{{ area_data.transportation_breakdown.public_transport + area_data.transportation_breakdown.walking_cycling }}%</h3>
+                                                                <small>Sustainable Mobility</small>
+                                                                <div class="progress mt-2">
+                                                                    <div class="progress-bar bg-success" style="width: {{ area_data.transportation_breakdown.public_transport + area_data.transportation_breakdown.walking_cycling }}%"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <h6>📊 Improvement Opportunities</h6>
+                                                <div class="list-group">
+                                                    {% if area_data.transportation_breakdown.public_transport < 30 %}
+                                                    <div class="list-group-item list-group-item-warning">
+                                                        <strong>Enhance Public Transit:</strong> Increase bus/metro frequency and coverage
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if area_data.transportation_breakdown.walking_cycling < 15 %}
+                                                    <div class="list-group-item list-group-item-info">
+                                                        <strong>Pedestrian Infrastructure:</strong> Develop walking and cycling paths
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if area_data.transportation_breakdown.private_vehicles > 45 %}
+                                                    <div class="list-group-item list-group-item-danger">
+                                                        <strong>Reduce Car Dependency:</strong> Implement carpool incentives and parking management
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Navigation Buttons -->
-        <div class="row mt-4 mb-5">
-            <div class="col-12 text-center">
-                <a href="{{ url_for('analysis_page') }}" class="btn btn-outline-primary me-2">
-                    ← Back to All Areas
-                </a>
-                <a href="{{ url_for('satellite_3d') }}" class="btn btn-primary">
-                    View 3D Satellite Map →
-                </a>
-            </div>
-        </div>
-    </div>
+                    <!-- Comparison Tab -->
+                    <div class="tab-pane fade" id="comparison" role="tabpanel">
+                        <!-- Area Comparison Chart -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="chart-container">
+                                    <h4 style="color: var(--primary-color);">
+                                        <i class="fas fa-balance-scale me-2"></i>Comparison with Other Areas
+                                    </h4>
+                                    {% if comparison_chart %}
+                                        {{ comparison_chart|safe }}
+                                    {% else %}
+                                        <div class="alert alert-warning">Comparison chart not available</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
 
-    <script>
-        function navigateToArea(areaKey) {
-            if (areaKey) {
-                window.location.href = `/analysis/${areaKey}`;
-            }
-        }
-
-        // Add interactive features
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add loading states
-            const images = document.querySelectorAll('img');
-            images.forEach(img => {
-                img.addEventListener('load', function() {
-                    this.style.opacity = '1';
-                });
-                img.style.opacity = '0';
-                img.style.transition = 'opacity 0.3s ease';
-            });
-        });
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+                        <!-- Comparative Analysis Details -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card shadow-sm">
+                                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
+                                        <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Regional Performance Ranking</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 style="color: var(--primary-color);">Regional Ranking & Position</h6>
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered table-hover">
+                                                        <thead style="background-color: var(--primary-color); color: white;">
+                                                            <tr>
+                                                                <th>Rank</th>
+                                                                <th>Area</th>
+                                                                <th>Sustainability Score</th>
+                                                                <th>Performance</th>
+                                                                <th>Trend</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% set sorted_areas = all_areas.values()|sort(attribute='sustainability_score', reverse=true) %}
+                                                            {% for area in sorted_areas %}
+                                                            <tr {% if area.name == area_data.name %}class="table-active"{% endif %}>
+                                                                <td>{{ loop.index }}</td>
+                                                                <td>
+                                                                    {% if area.name == area_data.name %}
+                                                                    <strong>{{ area.name }}</strong>
+                                                                    {% else %}
+                                                                    {{ area.name }}
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td>{{ "%.1f"|format(area.sustainability_score) }}</td>
+                                                                <td>
+                                                                    {% if area.sustainability_score >= 70 %}
+                                                                    <span class="badge bg-success">Excellent</span>
+                                                                    {% elif area.sustainability_score >= 50 %}
+                                                                    <span class="badge bg-warning">Good</span>
+                                                                    {% else %}
+                                                                    <span class="badge bg-danger">Needs Improvement</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td>
+                                                                    {% if loop.index < 3 %}
+                                                                    <span class="text-success">↑ Leading</span>
+                                                                    {% elif loop.index < 5 %}
+                                                                    <span class="text-warning">→ Average</span>
+                                                                    {% else %}
+                                                                    <span class="text-danger">↓ Developing</span>
+                                                                    {% endif
