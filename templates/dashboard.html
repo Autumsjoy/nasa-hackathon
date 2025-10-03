@@ -129,7 +129,7 @@
                     <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     <a class="nav-link active" href="{{ url_for('dashboard') }}">Dashboard</a>
                     <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
-                    <a class="nav-link" href="{{ url_for('satellite_analysis') }}">Satellite</a>
+                    <a class="nav-link" href="{{ url_for('satellite') }}">Satellite Data</a>
                     <a class="nav-link" href="{{ url_for('heatmaps') }}">Heat Maps</a>
                     <a class="nav-link" href="{{ url_for('satellite_3d') }}">3D Map</a>
                 </div>
@@ -224,7 +224,7 @@
                     </a>
                 </div>
                 <div class="col-md-2">
-                    <a href="{{ url_for('satellite_analysis') }}" class="text-decoration-none">
+                    <a href="{{ url_for('satellite') }}" class="text-decoration-none">
                         <div class="stat-card">
                             <div class="stat-number">🛰️</div>
                             <small>Satellite Data</small>
@@ -325,6 +325,34 @@
                         {{ comparison_chart|safe }}
                     {% else %}
                         <div class="alert alert-warning">Comparison chart not available</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Charts -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 style="color: var(--primary-color);">
+                        🌿 Vegetation Analysis
+                    </h4>
+                    {% if vegetation_chart %}
+                        {{ vegetation_chart|safe }}
+                    {% else %}
+                        <div class="alert alert-warning">Vegetation chart not available</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 style="color: var(--primary-color);">
+                        📡 Satellite Data Comparison
+                    </h4>
+                    {% if satellite_comparison_chart %}
+                        {{ satellite_comparison_chart|safe }}
+                    {% else %}
+                        <div class="alert alert-warning">Satellite comparison chart not available</div>
                     {% endif %}
                 </div>
             </div>

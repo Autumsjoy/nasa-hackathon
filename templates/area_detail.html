@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary: #2E8B57;
-            --secondary: #FF7F50;
-            --accent: #20B2AA;
-            --dark: #2F4F4F;
-            --light: #F5F5F5;
-            --success: #32CD32;
-            --warning: #FFA500;
-            --danger: #DC143C;
-            --info: #4682B4;
+            --primary: #50589C;
+            --secondary: #FF6B35;
+            --accent: #4ECDC4;
+            --dark: #2C3E50;
+            --light: #F8F9FA;
+            --success: #27AE60;
+            --warning: #E67E22;
+            --danger: #E74C3C;
+            --info: #3498DB;
         }
         
         .nav-custom {
@@ -78,22 +78,31 @@
             border-bottom: 3px solid var(--accent);
             padding-bottom: 10px;
         }
+        
+        .chart-placeholder {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--dark);
+            border: 2px dashed var(--accent);
+        }
     </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark nav-custom">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
                 <i class="fas fa-city me-2"></i>
                 Bhopal Urban Planning
             </a>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/">Home</a>
-                <a class="nav-link" href="/dashboard">Dashboard</a>
-                <a class="nav-link" href="/heatmaps">Heat Maps</a>
-                <a class="nav-link" href="/satellite">Satellite Data</a>
-                <a class="nav-link" href="/analysis">Analysis</a>
+                <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a class="nav-link" href="{{ url_for('heatmaps') }}">Heat Maps</a>
+                <a class="nav-link" href="{{ url_for('satellite') }}">Satellite Data</a>
+                <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
             </div>
         </div>
     </nav>
@@ -105,7 +114,8 @@
                 <div class="col-md-8">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/" class="text-white">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-white">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{{ url_for('analysis_page') }}" class="text-white">Analysis</a></li>
                             <li class="breadcrumb-item active text-white">{{ area_data.name }}</li>
                         </ol>
                     </nav>
@@ -119,7 +129,7 @@
                             <i class="fas fa-tree me-2"></i>Green Cover: {{ area_data.green_cover }}%
                         </span>
                         <span class="badge bg-warning fs-6 px-3 py-2">
-                            <i class="fas fa-thermometer-half me-2"></i>Temperature: {{ area_data.temperature }}°C
+                            <i class="fas fa-thermometer-half me-2"></i>Temperature: {{ "%.1f"|format(area_data.temperature) }}°C
                         </span>
                     </div>
                 </div>
@@ -146,7 +156,7 @@
                         <div class="stat-number">{{ "%.1f"|format(area_data.transport_index) }}</div>
                         <h5>Transport Index</h5>
                         <div class="progress">
-                            <div class="progress-bar" style="width: {{ area_data.transport_index }}%; background: var(--primary);"></div>
+                            <div class="progress-bar" style="width: {{ area_data.transport_index * 10 }}%; background: var(--primary);"></div>
                         </div>
                     </div>
                 </div>
@@ -155,7 +165,7 @@
                         <div class="stat-number">{{ "%.1f"|format(area_data.pollution_index) }}</div>
                         <h5>Pollution Index</h5>
                         <div class="progress">
-                            <div class="progress-bar" style="width: {{ area_data.pollution_index }}%; background: var(--danger);"></div>
+                            <div class="progress-bar" style="width: {{ area_data.pollution_index * 10 }}%; background: var(--danger);"></div>
                         </div>
                     </div>
                 </div>
@@ -164,13 +174,13 @@
                         <div class="stat-number">{{ "%.1f"|format(area_data.energy_index) }}</div>
                         <h5>Energy Index</h5>
                         <div class="progress">
-                            <div class="progress-bar" style="width: {{ area_data.energy_index }}%; background: var(--success);"></div>
+                            <div class="progress-bar" style="width: {{ area_data.energy_index * 10 }}%; background: var(--success);"></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stat-card">
-                        <div class="stat-number">{{ "%.1f"|format(area_data.vegetation_index) }}</div>
+                        <div class="stat-number">{{ "%.3f"|format(area_data.vegetation_index) }}</div>
                         <h5>Vegetation Index</h5>
                         <div class="progress">
                             <div class="progress-bar" style="width: {{ area_data.vegetation_index * 100 }}%; background: var(--accent);"></div>
@@ -188,8 +198,15 @@
                                 <i class="fas fa-chart-pie me-2"></i>Sustainability Metrics
                             </h5>
                         </div>
-                        <div class="card-body text-center">
-                            <img src="{{ sustainability_chart }}" alt="Sustainability Chart" class="img-fluid">
+                        <div class="card-body">
+                            {% if sustainability_chart %}
+                                {{ sustainability_chart|safe }}
+                            {% else %}
+                                <div class="chart-placeholder">
+                                    <i class="fas fa-chart-pie fa-3x mb-3"></i>
+                                    <p>Sustainability chart not available</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -200,8 +217,15 @@
                                 <i class="fas fa-radar me-2"></i>Area Profile
                             </h5>
                         </div>
-                        <div class="card-body text-center">
-                            <img src="{{ radar_chart }}" alt="Radar Chart" class="img-fluid">
+                        <div class="card-body">
+                            {% if radar_chart %}
+                                {{ radar_chart|safe }}
+                            {% else %}
+                                <div class="chart-placeholder">
+                                    <i class="fas fa-radar-chart fa-3x mb-3"></i>
+                                    <p>Radar chart not available</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -213,11 +237,18 @@
                     <div class="card-custom">
                         <div class="card-header-custom">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-bolt me-2"></i>Energy Consumption
+                                <i class="fas fa-bolt me-2"></i>Energy Distribution
                             </h5>
                         </div>
-                        <div class="card-body text-center">
-                            <img src="{{ energy_chart }}" alt="Energy Chart" class="img-fluid">
+                        <div class="card-body">
+                            {% if energy_chart %}
+                                {{ energy_chart|safe }}
+                            {% else %}
+                                <div class="chart-placeholder">
+                                    <i class="fas fa-bolt fa-3x mb-3"></i>
+                                    <p>Energy chart not available</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -228,14 +259,114 @@
                                 <i class="fas fa-bus me-2"></i>Transportation Modes
                             </h5>
                         </div>
-                        <div class="card-body text-center">
-                            <img src="{{ transport_chart }}" alt="Transport Chart" class="img-fluid">
+                        <div class="card-body">
+                            {% if transport_chart %}
+                                {{ transport_chart|safe }}
+                            {% else %}
+                                <div class="chart-placeholder">
+                                    <i class="fas fa-bus fa-3x mb-3"></i>
+                                    <p>Transportation chart not available</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- NASA Data Section -->
+            <!-- Performance Indicators -->
+            {% if performance_indicators %}
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-tachometer-alt me-2"></i>Performance Indicators
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {{ performance_indicators|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Area Details -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Area Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">📊 Basic Information</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Area Name:</strong></td>
+                                            <td>{{ area_data.name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Area Type:</strong></td>
+                                            <td><span class="badge bg-secondary">{{ area_data.type }}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Population Density:</strong></td>
+                                            <td>{{ area_data.population_density }} people/km²</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Green Cover:</strong></td>
+                                            <td>{{ area_data.green_cover }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Urbanization Level:</strong></td>
+                                            <td>{{ area_data.urbanization_level }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">🌡️ Environmental Data</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Temperature:</strong></td>
+                                            <td>{{ "%.1f"|format(area_data.temperature) }}°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Urban Heat Intensity:</strong></td>
+                                            <td>+{{ "%.1f"|format(area_data.urban_heat_intensity) }}°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Vegetation Health:</strong></td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if area_data.vegetation_health == 'Excellent' %}bg-success
+                                                    {% elif area_data.vegetation_health == 'Good' %}bg-primary
+                                                    {% elif area_data.vegetation_health == 'Moderate' %}bg-warning
+                                                    {% else %}bg-danger{% endif %}">
+                                                    {{ area_data.vegetation_health }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Solar Potential:</strong></td>
+                                            <td>{{ "%.1f"|format(area_data.solar_potential) }} kWh/m²/day</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Renewable Capacity:</strong></td>
+                                            <td>{{ area_data.renewable_capacity }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Satellite Data Section -->
             <div class="row">
                 <div class="col-12">
                     <div class="card-custom">
@@ -247,46 +378,96 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6 class="text-primary">MODIS Data</h6>
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Vegetation Index (NDVI):</span>
-                                            <strong>{{ "%.3f"|format(area_data.modis_vegetation.ndvi) }}</strong>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Enhanced Vegetation Index:</span>
-                                            <strong>{{ "%.3f"|format(area_data.modis_vegetation.evi) }}</strong>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Land Cover Type:</span>
-                                            <strong>{{ area_data.modis_land_cover.land_cover_type }}</strong>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Land Surface Temperature:</span>
-                                            <strong>{{ area_data.modis_temperature.daytime_temperature }}°C</strong>
-                                        </li>
-                                    </ul>
+                                    <h6 class="text-primary mb-3">🛰️ Satellite Information</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Landsat Acquisition:</strong></td>
+                                            <td>{{ area_data.satellite_imagery.landsat_acquisition_date }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>MODIS Acquisition:</strong></td>
+                                            <td>{{ area_data.satellite_imagery.modis_acquisition_date }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Resolution:</strong></td>
+                                            <td>{{ area_data.satellite_imagery.resolution }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Cloud Cover:</strong></td>
+                                            <td>{{ area_data.satellite_imagery.cloud_cover }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Data Quality:</strong></td>
+                                            <td>{{ area_data.satellite_imagery.data_quality }}</td>
+                                        </tr>
+                                    </table>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6 class="text-primary">Landsat Data</h6>
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Urbanization Index (NDBI):</span>
-                                            <strong>{{ "%.3f"|format(area_data.landsat_indices.ndbi) }}</strong>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Urbanization Level:</span>
-                                            <strong>{{ area_data.landsat_indices.urbanization_level }}</strong>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Vegetation Health:</span>
-                                            <strong>{{ area_data.landsat_indices.vegetation_health }}</strong>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            <span>Data Source:</span>
-                                            <strong>{{ area_data.landsat_metadata.satellite }}</strong>
-                                        </li>
-                                    </ul>
+                                    <h6 class="text-primary mb-3">📊 Vegetation Analysis</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>NDVI Mean:</strong></td>
+                                            <td>{{ "%.3f"|format(area_data.detailed_vegetation.ndvi_mean) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Forest Cover:</strong></td>
+                                            <td>{{ area_data.detailed_vegetation.forest_cover }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Agricultural Land:</strong></td>
+                                            <td>{{ area_data.detailed_vegetation.agricultural_land }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Green Spaces:</strong></td>
+                                            <td>{{ area_data.detailed_vegetation.green_spaces }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Vegetation Health:</strong></td>
+                                            <td>{{ area_data.detailed_vegetation.vegetation_health }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Urban Analysis -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">🏙️ Urban Analysis</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Built-up Area:</strong></td>
+                                            <td>{{ area_data.urban_analysis.built_up_area }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Road Density:</strong></td>
+                                            <td>{{ area_data.urban_analysis.road_density }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Building Height Avg:</strong></td>
+                                            <td>{{ area_data.urban_analysis.building_height_avg }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-3">⚡ Infrastructure Metrics</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Public Transport Coverage:</strong></td>
+                                            <td>{{ area_data.infrastructure_metrics.public_transport_coverage }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Renewable Energy Capacity:</strong></td>
+                                            <td>{{ area_data.infrastructure_metrics.renewable_energy_capacity }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Waste Management Efficiency:</strong></td>
+                                            <td>{{ area_data.infrastructure_metrics.waste_management_efficiency }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Water Supply Coverage:</strong></td>
+                                            <td>{{ area_data.infrastructure_metrics.water_supply_coverage }}</td>
+                                        </tr>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -294,34 +475,38 @@
                 </div>
             </div>
 
-            <!-- Key Concerns -->
-            {% if area_data.key_concerns %}
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="card-custom">
-                        <div class="card-header-custom">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-exclamation-triangle me-2"></i>Key Urban Planning Concerns
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                {% for concern in area_data.key_concerns %}
-                                <div class="col-md-6 mb-2">
-                                    <div class="alert alert-warning d-flex align-items-center">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        {{ concern }}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
+            <!-- Action Buttons -->
+            <div class="row mt-5">
+                <div class="col-12 text-center">
+                    <a href="{{ url_for('analysis_page') }}" class="btn btn-outline-primary me-2">
+                        ← Back to Analysis
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary me-2">
+                        View Dashboard
+                    </a>
+                    <a href="{{ url_for('satellite') }}" class="btn btn-success">
+                        Explore Satellite Data →
+                    </a>
                 </div>
             </div>
-            {% endif %}
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 style="color: white;">🌌 NASA Hackathon Project</h5>
+                    <p class="text-muted">Urban Planning & Sustainability Analysis using Satellite Data</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="text-muted">&copy; 2025 NASA Space Apps Challenge<br>
+                    Bhopal Urban Planning Initiative</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

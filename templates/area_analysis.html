@@ -150,7 +150,7 @@
                     <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
                     <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
-                    <a class="nav-link" href="{{ url_for('satellite_analysis') }}">Satellite</a>
+                    <a class="nav-link" href="{{ url_for('satellite') }}">Satellite</a>
                     <a class="nav-link" href="{{ url_for('heatmaps') }}">Heat Maps</a>
                     <a class="nav-link" href="{{ url_for('satellite_3d') }}">3D Map</a>
                 </div>
@@ -704,6 +704,22 @@
                                         {{ benchmark_chart|safe }}
                                     {% else %}
                                         <div class="alert alert-warning">Benchmark comparison chart not available</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Area Comparison -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="chart-container">
+                                    <h4 style="color: var(--primary-color);">
+                                        <i class="fas fa-chart-bar me-2"></i>Area Comparison
+                                    </h4>
+                                    {% if comparison_chart %}
+                                        {{ comparison_chart|safe }}
+                                    {% else %}
+                                        <div class="alert alert-warning">Comparison chart not available</div>
                                     {% endif %}
                                 </div>
                             </div>

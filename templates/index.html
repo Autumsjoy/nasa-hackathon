@@ -189,7 +189,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark nav-custom fixed-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
                 <i class="fas fa-city me-2"></i>
                 Bhopal Urban Planning
             </a>
@@ -199,22 +199,22 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/">Home</a>
+                        <a class="nav-link active" href="{{ url_for('index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-    <a class="nav-link" href="satellite-3d.html">3D Satellite Map</a>
-</li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/satellite">3D Maps</a>
+                        <a class="nav-link" href="{{ url_for('satellite') }}">Satellite Data</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/heatmaps">Heat Maps</a>
+                        <a class="nav-link" href="{{ url_for('satellite_3d') }}">3D Maps</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/analysis">Analysis</a>
+                        <a class="nav-link" href="{{ url_for('heatmaps') }}">Heat Maps</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
                     </li>
                 </ul>
             </div>
@@ -240,10 +240,10 @@
                         <span class="hero-badge"><i class="fas fa-chart-line me-2"></i>Real-time Analytics</span>
                     </div>
                     <div class="d-flex gap-3 flex-wrap">
-                        <a href="/dashboard" class="btn btn-primary-custom">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary-custom">
                             <i class="fas fa-chart-bar me-2"></i>Explore Dashboard
                         </a>
-                        <a href="/satellite" class="btn btn-secondary-custom">
+                        <a href="{{ url_for('satellite_3d') }}" class="btn btn-secondary-custom">
                             <i class="fas fa-globe me-2"></i>View 3D Maps
                         </a>
                     </div>
@@ -261,7 +261,7 @@
             <div class="row g-4">
                 <div class="col-md-3">
                     <div class="stat-card">
-                        <div class="stat-number">7</div>
+                        <div class="stat-number">{{ data|length }}</div>
                         <h5>Urban Areas</h5>
                         <p class="mb-0">Comprehensive Coverage</p>
                     </div>
@@ -364,7 +364,7 @@
                             <strong style="color: var(--success);">{{ "%.1f"|format(area_data.energy_index) }}</strong>
                         </div>
                     </div>
-                    <a href="/area/{{ area_key }}" class="btn btn-primary-custom btn-sm w-100 mt-3">
+                    <a href="{{ url_for('area_analysis', area_key=area_key) }}" class="btn btn-primary-custom btn-sm w-100 mt-3">
                         View Detailed Analysis
                     </a>
                 </div>
@@ -372,6 +372,23 @@
             </div>
         </div>
     </section>
+
+    <!-- Sustainability Chart Section -->
+    {% if sustainability_chart %}
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center">Area Sustainability Scores</h2>
+            <div class="card card-custom">
+                <div class="card-header card-header-custom">
+                    <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Sustainability Overview</h4>
+                </div>
+                <div class="card-body">
+                    {{ sustainability_chart|safe }}
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     <!-- CTA Section -->
     <section class="py-5" style="background: linear-gradient(135deg, var(--dark), var(--primary)); color: white;">
@@ -381,10 +398,10 @@
                 Dive deep into comprehensive urban planning analysis with NASA-powered data insights and 3D mapping.
             </p>
             <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <a href="/dashboard" class="btn btn-light btn-lg">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg">
                     <i class="fas fa-rocket me-2"></i>Launch Dashboard
                 </a>
-                <a href="/satellite" class="btn btn-outline-light btn-lg">
+                <a href="{{ url_for('satellite_3d') }}" class="btn btn-outline-light btn-lg">
                     <i class="fas fa-globe me-2"></i>Explore 3D Maps
                 </a>
             </div>
@@ -425,13 +442,13 @@
 
         // Add markers for Bhopal areas
         var areas = [
-            {name: "Old Bhopal", lat: 23.2599, lon: 77.4126, type: "Mixed Use", score: 21.4, key: "old_bhopal"},
-            {name: "New Bhopal", lat: 23.2278, lon: 77.4357, type: "Residential/Commercial", score: 36.1, key: "new_bhopal"},
-            {name: "Shahpura", lat: 23.3000, lon: 77.3667, type: "Residential", score: 28.7, key: "shahpura"},
-            {name: "Kolar", lat: 23.1667, lon: 77.4333, type: "Suburban/Residential", score: 41.7, key: "kolar"},
-            {name: "Indrapuri", lat: 23.2800, lon: 77.4200, type: "Residential", score: 35.2, key: "indrapuri"},
-            {name: "Bhopal Lake Area", lat: 23.2667, lon: 77.4000, type: "Recreational", score: 55.8, key: "bhopal_lake"},
-            {name: "Industrial Area", lat: 23.2000, lon: 77.4500, type: "Industrial", score: 15.3, key: "industrial_area"}
+            {name: "Old Bhopal Heritage", lat: 23.2599, lon: 77.4126, type: "Heritage & Commercial", score: 24.7, key: "old_bhopal"},
+            {name: "New Bhopal Development", lat: 23.2278, lon: 77.4357, type: "Residential & Commercial", score: 33.8, key: "new_bhopal"},
+            {name: "Shahpura Sector", lat: 23.3000, lon: 77.3667, type: "Mixed Use", score: 28.7, key: "shahpura"},
+            {name: "Kolar Residential Zone", lat: 23.1667, lon: 77.4333, type: "Residential", score: 41.7, key: "kolar"},
+            {name: "Indrapuri Housing", lat: 23.2800, lon: 77.4200, type: "Residential", score: 35.2, key: "indrapuri"},
+            {name: "Bhopal Lake Area", lat: 23.2667, lon: 77.4000, type: "Environmental & Recreational", score: 55.8, key: "bhopal_lake"},
+            {name: "Industrial Zone", lat: 23.2000, lon: 77.4500, type: "Industrial", score: 15.3, key: "industrial_area"}
         ];
 
         areas.forEach(function(area) {
@@ -446,7 +463,7 @@
                         </h5>
                         <p><strong>Type:</strong> ${area.type}</p>
                         <p><strong>Score:</strong> <span style="color: ${color}; font-weight: bold;">${area.score}</span></p>
-                        <a href="/area/${area.key}" class="btn btn-primary-custom btn-sm w-100">View Detailed Analysis</a>
+                        <a href="/analysis/${area.key}" class="btn btn-primary-custom btn-sm w-100">View Detailed Analysis</a>
                     </div>
                 `)
                 .bindTooltip(`${area.name} - Score: ${area.score}`);

@@ -1009,75 +1009,99 @@ class DataVisualizerPlotly:
         except Exception as e:
             print(f"Error generating benchmark comparison chart: {e}")
             return self._generate_error_html("Benchmark Comparison Chart")
+        
+def generate_performance_indicators(self, area_data):
+    """Generate performance indicators gauge chart for individual area"""
+    try:
+        # Create gauge charts for key metrics
+        metrics = [
+            ('sustainability_score', 'Sustainability', 100, self.colors['primary']),
+            ('transport_index', 'Transport', 10, self.colors['accent']),
+            ('energy_index', 'Energy', 10, self.colors['success']),
+            ('pollution_control', 'Pollution Control', 10, self.colors['warning'])
+        ]
+        
+        # Create subplots
+        fig = self._create_gauge_subplots(area_data, metrics)
+        
+        return fig.to_html(include_plotlyjs=False, config={'displayModeBar': True})
+        
+    except Exception as e:
+        print(f"Error generating performance indicators: {e}")
+        return self._generate_error_html("Performance Indicators")
+
+def _create_gauge_subplots(self, area_data, metrics):
+    """Create gauge subplots for performance indicators"""
+    fig = sp.make_subplots(
+        rows=2, cols=2,
+        specs=[[{'type': 'indicator'}, {'type': 'indicator'}],
+               [{'type': 'indicator'}, {'type': 'indicator'}]],
+        subplot_titles=['Sustainability', 'Transport', 'Energy', 'Pollution Control']
+    )
     
-    def generate_performance_indicators(self, area_data):
-        """Generate performance indicators gauge chart"""
-        try:
-            # Create gauge charts for key metrics
-            metrics = [
-                ('sustainability_score', 'Sustainability', 100),
-                ('transport_index', 'Transport', 10),
-                ('energy_index', 'Energy', 10),
-                ('pollution_index', 'Pollution Control', 10)
-            ]
-            
-            fig = sp.make_subplots(
-                rows=2, cols=2,
-                specs=[[{'type': 'indicator'}, {'type': 'indicator'}],
-                       [{'type': 'indicator'}, {'type': 'indicator'}]],
-                subplot_titles=['Sustainability', 'Transport', 'Energy', 'Pollution Control']
-            )
-            
-            for i, (metric_key, metric_name, max_val) in enumerate(metrics):
-                value = area_data.get(metric_key, max_val/2)
-                
-                # Adjust value for pollution (lower is better)
-                if metric_key == 'pollution_index':
-                    value = max_val - value
-                
-                # Determine color based on performance
-                if metric_key == 'sustainability_score':
-                    threshold_good = 70
-                    threshold_medium = 50
-                else:
-                    threshold_good = 7
-                    threshold_medium = 5
-                
-                if value >= threshold_good:
-                    gauge_color = self.colors['success']
-                elif value >= threshold_medium:
-                    gauge_color = self.colors['warning']
-                else:
-                    gauge_color = self.colors['danger']
-                
-                fig.add_trace(go.Indicator(
-                    mode="gauge+number",
-                    value=value,
-                    title={'text': metric_name},
-                    gauge={
-                        'axis': {'range': [0, max_val]},
-                        'bar': {'color': gauge_color},
-                        'steps': [
-                            {'range': [0, threshold_medium], 'color': self.colors['light']},
-                            {'range': [threshold_medium, threshold_good], 'color': self.colors['warning'] + '40'},
-                            {'range': [threshold_good, max_val], 'color': self.colors['success'] + '40'}
-                        ]
-                    }
-                ), row=(i//2)+1, col=(i%2)+1)
-            
-            fig.update_layout(
-                height=400,
-                margin=dict(l=50, r=50, t=80, b=50),
-                paper_bgcolor='white',
-                font=dict(color=self.colors['dark'])
-            )
-            
-            return fig.to_html(include_plotlyjs=False, config={'displayModeBar': True})
-            
-        except Exception as e:
-            print(f"Error generating performance indicators: {e}")
-            return self._generate_error_html("Performance Indicators")
+    for i, (metric_key, metric_name, max_val, default_color) in enumerate(metrics):
+        # Get value and adjust for pollution (lower is better)
+        if metric_key == 'pollution_control':
+            value = 10 - area_data.get('pollution_index', 5)
+        else:
+            value = area_data.get(metric_key, max_val/2)
+        
+        # Determine color based on performance
+        gauge_color = self._get_gauge_color(metric_key, value, max_val, default_color)
+        
+        # Add gauge trace
+        fig.add_trace(go.Indicator(
+            mode="gauge+number+delta",
+            value=value,
+            title={'text': metric_name},
+            gauge={
+                'axis': {'range': [0, max_val], 'tickwidth': 1},
+                'bar': {'color': gauge_color},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': self.colors['dark'],
+                'steps': [
+                    {'range': [0, max_val*0.6], 'color': self.colors['light']},
+                    {'range': [max_val*0.6, max_val*0.8], 'color': self.colors['warning'] + '40'},
+                    {'range': [max_val*0.8, max_val], 'color': self.colors['success'] + '40'}
+                ],
+                'threshold': {
+                    'line': {'color': "red", 'width': 4},
+                    'thickness': 0.75,
+                    'value': max_val * 0.8
+                }
+            },
+            delta={'reference': max_val * 0.6, 'relative': True}
+        ), row=(i//2)+1, col=(i%2)+1)
     
+    fig.update_layout(
+        height=400,
+        margin=dict(l=50, r=50, t=80, b=50),
+        paper_bgcolor='white',
+        font=dict(color=self.colors['dark']),
+        title=dict(
+            text=f"{area_data.get('name', 'Area')} - Performance Indicators",
+            font=dict(size=16, color=self.colors['primary'])
+        )
+    )
+    
+    return fig
+
+def _get_gauge_color(self, metric_key, value, max_val, default_color):
+    """Determine gauge color based on performance"""
+    if metric_key == 'sustainability_score':
+        threshold_good = 70
+        threshold_medium = 50
+    else:
+        threshold_good = max_val * 0.8
+        threshold_medium = max_val * 0.6
+    
+    if value >= threshold_good:
+        return self.colors['success']
+    elif value >= threshold_medium:
+        return self.colors['warning']
+    else:
+        return self.colors['danger']     
     def generate_trend_analysis(self, analysis_data):
         """Generate trend analysis chart showing area progression"""
         try:
@@ -1153,52 +1177,219 @@ class DataVisualizerPlotly:
             print(f"Error generating trend analysis: {e}")
             return self._generate_error_html("Trend Analysis Chart")
     
-    def generate_correlation_matrix(self, analysis_data):
-        """Generate correlation matrix between different metrics"""
-        try:
-            # Extract metrics for correlation analysis
-            metrics = ['sustainability_score', 'transport_index', 'energy_index', 
-                      'pollution_index', 'green_cover', 'temperature']
-            
-            # Create correlation data
-            data = {}
-            for metric in metrics:
-                data[metric] = [area_data.get(metric, 0) for area_data in analysis_data.values()]
-            
-            df = pd.DataFrame(data)
-            
-            # Calculate correlation matrix
-            corr_matrix = df.corr()
-            
-            fig = go.Figure(data=go.Heatmap(
-                z=corr_matrix.values,
-                x=[metric.replace('_', ' ').title() for metric in corr_matrix.columns],
-                y=[metric.replace('_', ' ').title() for metric in corr_matrix.index],
-                colorscale='RdBu',
-                zmid=0,
-                text=[[f'{val:.2f}' for val in row] for row in corr_matrix.values],
-                texttemplate="%{text}",
-                textfont={"size": 12},
-                hoverongaps=False,
-                hovertemplate='<b>%{y} vs %{x}</b><br>Correlation: %{z:.3f}<extra></extra>'
-            ))
-            
-            fig.update_layout(
-                title=dict(
-                    text='Metric Correlation Matrix',
-                    font=dict(size=16, color=self.colors['primary'])
-                ),
-                height=500,
-                margin=dict(l=50, r=50, t=80, b=100),
-                xaxis=dict(tickangle=45)
+def generate_correlation_matrix(self, analysis_data):
+    """Generate correlation matrix between different metrics"""
+    try:
+        # Extract metrics for correlation analysis
+        metrics = ['sustainability_score', 'transport_index', 'energy_index', 
+                  'pollution_index', 'vegetation_index', 'temperature']
+        
+        # Create correlation data
+        data = {}
+        for metric in metrics:
+            data[metric] = [area_data.get(metric, 0) for area_data in analysis_data.values()]
+        
+        df = pd.DataFrame(data)
+        
+        # Calculate correlation matrix
+        corr_matrix = df.corr()
+        
+        fig = go.Figure(data=go.Heatmap(
+            z=corr_matrix.values,
+            x=[metric.replace('_', ' ').title() for metric in corr_matrix.columns],
+            y=[metric.replace('_', ' ').title() for metric in corr_matrix.index],
+            colorscale='RdBu',
+            zmid=0,
+            text=[[f'{val:.2f}' for val in row] for row in corr_matrix.values],
+            texttemplate="%{text}",
+            textfont={"size": 12},
+            hoverongaps=False,
+            hovertemplate='<b>%{y} vs %{x}</b><br>Correlation: %{z:.3f}<extra></extra>'
+        ))
+        
+        fig.update_layout(
+            title=dict(
+                text='Metric Correlation Matrix',
+                font=dict(size=16, color=self.colors['primary'])
+            ),
+            height=500,
+            margin=dict(l=50, r=50, t=80, b=100),
+            xaxis=dict(tickangle=45)
+        )
+        
+        return fig.to_html(include_plotlyjs=False, config={'displayModeBar': True})
+        
+    except Exception as e:
+        print(f"Error generating correlation matrix: {e}")
+        return self._generate_error_html("Correlation Matrix")
+
+def generate_trend_analysis(self, analysis_data):
+    """Generate trend analysis chart showing area progression"""
+    try:
+        areas = [data.get('name', 'Unknown') for data in analysis_data.values()]
+        
+        # Simulate trend data (in real scenario, this would come from historical data)
+        current_scores = [data.get('sustainability_score', 50) for data in analysis_data.values()]
+        previous_scores = [max(0, score - np.random.randint(5, 15)) for score in current_scores]
+        
+        fig = go.Figure()
+        
+        # Add previous scores
+        fig.add_trace(go.Bar(
+            name='Previous Period',
+            x=areas,
+            y=previous_scores,
+            marker_color=self.colors['accent'],
+            hovertemplate='<b>%{x}</b><br>Previous Score: %{y:.1f}<extra></extra>'
+        ))
+        
+        # Add current scores
+        fig.add_trace(go.Bar(
+            name='Current Period',
+            x=areas,
+            y=current_scores,
+            marker_color=self.colors['primary'],
+            hovertemplate='<b>%{x}</b><br>Current Score: %{y:.1f}<extra></extra>'
+        ))
+        
+        # Add improvement annotations
+        for i, (prev, curr) in enumerate(zip(previous_scores, current_scores)):
+            improvement = curr - prev
+            if improvement > 0:
+                fig.add_annotation(
+                    x=areas[i],
+                    y=curr + 2,
+                    text=f"+{improvement:.1f}",
+                    showarrow=False,
+                    font=dict(color=self.colors['success'], size=12)
+                )
+        
+        fig.update_layout(
+            title=dict(
+                text='Sustainability Score Trends - Period Comparison',
+                font=dict(size=16, color=self.colors['primary'])
+            ),
+            xaxis=dict(
+                title='Areas',
+                tickangle=45
+            ),
+            yaxis=dict(
+                title='Sustainability Score',
+                range=[0, 100]
+            ),
+            barmode='group',
+            plot_bgcolor=self.colors['light'],
+            paper_bgcolor='white',
+            font=dict(color=self.colors['dark']),
+            height=500,
+            margin=dict(l=50, r=50, t=80, b=100),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
             )
-            
-            return fig.to_html(include_plotlyjs=False, config={'displayModeBar': True})
-            
-        except Exception as e:
-            print(f"Error generating correlation matrix: {e}")
-            return self._generate_error_html("Correlation Matrix")
+        )
+        
+        return fig.to_html(include_plotlyjs=False, config={'displayModeBar': True})
+        
+    except Exception as e:
+        print(f"Error generating trend analysis: {e}")
+        return self._generate_error_html("Trend Analysis Chart")
+
+def generate_performance_indicators(self, area_data):
+    """Generate performance indicators gauge chart for individual area"""
+    try:
+        # Create gauge charts for key metrics
+        metrics = [
+            ('sustainability_score', 'Sustainability', 100, self.colors['primary']),
+            ('transport_index', 'Transport', 10, self.colors['accent']),
+            ('energy_index', 'Energy', 10, self.colors['success']),
+            ('pollution_control', 'Pollution Control', 10, self.colors['warning'])
+        ]
+        
+        # Create subplots
+        fig = self._create_gauge_subplots(area_data, metrics)
+        
+        return fig.to_html(include_plotlyjs=False, config={'displayModeBar': True})
+        
+    except Exception as e:
+        print(f"Error generating performance indicators: {e}")
+        return self._generate_error_html("Performance Indicators")
+
+def _create_gauge_subplots(self, area_data, metrics):
+    """Create gauge subplots for performance indicators"""
+    fig = sp.make_subplots(
+        rows=2, cols=2,
+        specs=[[{'type': 'indicator'}, {'type': 'indicator'}],
+               [{'type': 'indicator'}, {'type': 'indicator'}]],
+        subplot_titles=['Sustainability', 'Transport', 'Energy', 'Pollution Control']
+    )
     
+    for i, (metric_key, metric_name, max_val, default_color) in enumerate(metrics):
+        # Get value and adjust for pollution (lower is better)
+        if metric_key == 'pollution_control':
+            value = 10 - area_data.get('pollution_index', 5)
+        else:
+            value = area_data.get(metric_key, max_val/2)
+        
+        # Determine color based on performance
+        gauge_color = self._get_gauge_color(metric_key, value, max_val, default_color)
+        
+        # Add gauge trace
+        fig.add_trace(go.Indicator(
+            mode="gauge+number+delta",
+            value=value,
+            title={'text': metric_name},
+            gauge={
+                'axis': {'range': [0, max_val], 'tickwidth': 1},
+                'bar': {'color': gauge_color},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': self.colors['dark'],
+                'steps': [
+                    {'range': [0, max_val*0.6], 'color': self.colors['light']},
+                    {'range': [max_val*0.6, max_val*0.8], 'color': self.colors['warning'] + '40'},
+                    {'range': [max_val*0.8, max_val], 'color': self.colors['success'] + '40'}
+                ],
+                'threshold': {
+                    'line': {'color': "red", 'width': 4},
+                    'thickness': 0.75,
+                    'value': max_val * 0.8
+                }
+            },
+            delta={'reference': max_val * 0.6, 'relative': True}
+        ), row=(i//2)+1, col=(i%2)+1)
+    
+    fig.update_layout(
+        height=400,
+        margin=dict(l=50, r=50, t=80, b=50),
+        paper_bgcolor='white',
+        font=dict(color=self.colors['dark']),
+        title=dict(
+            text=f"{area_data.get('name', 'Area')} - Performance Indicators",
+            font=dict(size=16, color=self.colors['primary'])
+        )
+    )
+    
+    return fig
+
+def _get_gauge_color(self, metric_key, value, max_val, default_color):
+    """Determine gauge color based on performance"""
+    if metric_key == 'sustainability_score':
+        threshold_good = 70
+        threshold_medium = 50
+    else:
+        threshold_good = max_val * 0.8
+        threshold_medium = max_val * 0.6
+    
+    if value >= threshold_good:
+        return self.colors['success']
+    elif value >= threshold_medium:
+        return self.colors['warning']
+    else:
+        return self.colors['danger']
     def _generate_error_html(self, chart_name):
         """Generate error message HTML"""
         return f"""

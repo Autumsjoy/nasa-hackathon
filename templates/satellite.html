@@ -54,6 +54,13 @@
         .nav-pills .nav-link.active {
             background-color: var(--primary-color) !important;
         }
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -71,7 +78,7 @@
                     <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
                     <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
-                    <a class="nav-link active" href="{{ url_for('satellite_analysis') }}">Satellite Data</a>
+                    <a class="nav-link active" href="{{ url_for('satellite') }}">Satellite Data</a>
                     <a class="nav-link" href="{{ url_for('heatmaps') }}">Heat Maps</a>
                     <a class="nav-link" href="{{ url_for('satellite_3d') }}">3D Map</a>
                 </div>
@@ -173,38 +180,34 @@
                         <!-- Main Charts -->
                         <div class="row mb-4">
                             <div class="col-md-8">
-                                <div class="card data-card">
-                                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
-                                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Satellite Data Comparison</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        {% if satellite_chart %}
-                                            {{ satellite_chart|safe }}
-                                        {% else %}
-                                            <div class="alert alert-warning text-center py-4">
-                                                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
-                                                <p>Satellite data chart is currently unavailable</p>
-                                                <small class="text-muted">Please try refreshing the page or check back later</small>
-                                            </div>
-                                        {% endif %}
-                                    </div>
+                                <div class="chart-container">
+                                    <h4 style="color: var(--primary-color);">
+                                        <i class="fas fa-chart-line me-2"></i>Satellite Data Comparison
+                                    </h4>
+                                    {% if satellite_chart %}
+                                        {{ satellite_chart|safe }}
+                                    {% else %}
+                                        <div class="alert alert-warning text-center py-4">
+                                            <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                                            <p>Satellite data chart is currently unavailable</p>
+                                            <small class="text-muted">Please try refreshing the page or check back later</small>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="card data-card">
-                                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
-                                        <h5 class="mb-0"><i class="fas fa-seedling me-2"></i>Vegetation Analysis</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        {% if vegetation_chart %}
-                                            {{ vegetation_chart|safe }}
-                                        {% else %}
-                                            <div class="alert alert-warning text-center py-4">
-                                                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
-                                                <p>Vegetation analysis chart is currently unavailable</p>
-                                            </div>
-                                        {% endif %}
-                                    </div>
+                                <div class="chart-container">
+                                    <h4 style="color: var(--primary-color);">
+                                        <i class="fas fa-seedling me-2"></i>Vegetation Analysis
+                                    </h4>
+                                    {% if vegetation_chart %}
+                                        {{ vegetation_chart|safe }}
+                                    {% else %}
+                                        <div class="alert alert-warning text-center py-4">
+                                            <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                                            <p>Vegetation analysis chart is currently unavailable</p>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -375,24 +378,22 @@
                     <div class="tab-pane fade" id="comparison" role="tabpanel">
                         <div class="row">
                             <div class="col-12">
-                                <div class="card data-card">
-                                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
-                                        <h5 class="mb-0"><i class="fas fa-balance-scale me-2"></i>Multi-Area Satellite Data Comparison</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        {% if comparison_chart %}
-                                            {{ comparison_chart|safe }}
-                                        {% else %}
-                                            <div class="alert alert-warning text-center py-5">
-                                                <i class="fas fa-chart-bar fa-3x mb-3 text-muted"></i>
-                                                <h5>Comparison Data Unavailable</h5>
-                                                <p class="text-muted">The comparison chart is currently being generated</p>
-                                                <button class="btn btn-primary mt-2" onclick="window.location.reload()">
-                                                    <i class="fas fa-redo me-2"></i>Refresh Page
-                                                </button>
-                                            </div>
-                                        {% endif %}
-                                    </div>
+                                <div class="chart-container">
+                                    <h4 style="color: var(--primary-color);">
+                                        <i class="fas fa-balance-scale me-2"></i>Multi-Area Satellite Data Comparison
+                                    </h4>
+                                    {% if satellite_analysis_chart %}
+                                        {{ satellite_analysis_chart|safe }}
+                                    {% else %}
+                                        <div class="alert alert-warning text-center py-5">
+                                            <i class="fas fa-chart-bar fa-3x mb-3 text-muted"></i>
+                                            <h5>Comparison Data Unavailable</h5>
+                                            <p class="text-muted">The comparison chart is currently being generated</p>
+                                            <button class="btn btn-primary mt-2" onclick="window.location.reload()">
+                                                <i class="fas fa-redo me-2"></i>Refresh Page
+                                            </button>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

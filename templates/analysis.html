@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detailed Analysis | NASA Hackathon</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary-color: #50589C;
@@ -85,7 +85,7 @@
                     <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
                     <a class="nav-link active" href="{{ url_for('analysis_page') }}">Analysis</a>
-                    <a class="nav-link" href="{{ url_for('satellite_analysis') }}">Satellite</a>
+                    <a class="nav-link" href="{{ url_for('satellite') }}">Satellite</a>
                     <a class="nav-link" href="{{ url_for('heatmaps') }}">Heat Maps</a>
                     <a class="nav-link" href="{{ url_for('satellite_3d') }}">3D Map</a>
                 </div>
@@ -120,11 +120,11 @@
         <div class="area-selector">
             <h4 style="color: var(--primary-color);">Select Area for Detailed Analysis</h4>
             <div class="row">
-                {% for area_key, area_name in area_mappings.items() %}
+                {% for area_key, area_info in area_mappings.items() %}
                 <div class="col-md-4 mb-2">
                     <a href="{{ url_for('area_analysis', area_key=area_key) }}" 
                        class="btn btn-outline-primary w-100 text-start">
-                        📍 {{ area_name }}
+                        📍 {{ area_info.name }}
                         <span class="badge bg-primary float-end">
                             {{ "%.1f"|format(data[area_key].sustainability_score) }}
                         </span>
@@ -158,15 +158,39 @@
             </div>
         </div>
 
-        <!-- Radar Chart -->
+        <!-- Additional Charts -->
         <div class="row">
-            <div class="col-12">
+            <div class="col-md-6">
                 <div class="chart-container">
                     <h4 style="color: var(--primary-color);">🎯 Comprehensive Area Comparison</h4>
                     {% if radar_chart %}
                         {{ radar_chart|safe }}
                     {% else %}
                         <div class="alert alert-warning">Radar chart not available</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 style="color: var(--primary-color);">📈 Trend Analysis</h4>
+                    {% if trend_analysis %}
+                        {{ trend_analysis|safe }}
+                    {% else %}
+                        <div class="alert alert-warning">Trend analysis not available</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Correlation Matrix -->
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h4 style="color: var(--primary-color);">🔗 Metric Correlation Matrix</h4>
+                    {% if correlation_matrix %}
+                        {{ correlation_matrix|safe }}
+                    {% else %}
+                        <div class="alert alert-warning">Correlation matrix not available</div>
                     {% endif %}
                 </div>
             </div>
@@ -192,11 +216,6 @@
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="infrastructure-tab" data-bs-toggle="tab" data-bs-target="#infrastructure" type="button" role="tab">
                                 🏗️ Infrastructure
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="satellite-tab" data-bs-toggle="tab" data-bs-target="#satellite" type="button" role="tab">
-                                🛰️ Satellite Data
                             </button>
                         </li>
                     </ul>
@@ -343,50 +362,21 @@
                                             <td>{{ area_data.grid_dependency }}%</td>
                                             <td>{{ area_data.solar_percentage }}%</td>
                                             <td>
-                                                {% set transport = area_data.transportation_breakdown %}
-                                                Public: {{ transport.public_transport }}%
+                                                {% if area_data.transportation_breakdown %}
+                                                    {% set transport = area_data.transportation_breakdown %}
+                                                    Public: {{ transport.public_transport if transport.public_transport is defined else 'N/A' }}%
+                                                {% else %}
+                                                    Data not available
+                                                {% endif %}
                                             </td>
                                             <td>
                                                 <span class="badge 
                                                     {% if area_data.renewable_capacity == 'Excellent' %}bg-success
                                                     {% elif area_data.renewable_capacity == 'High' %}bg-primary
                                                     {% else %}bg-warning{% endif %}">
-                                                    {{ area_data.renewable_capacity }}
+                                                    {{ area_data.renewable_capacity if area_data.renewable_capacity else 'Medium' }}
                                                 </span>
                                             </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Satellite Data Tab -->
-                        <div class="tab-pane fade" id="satellite" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead style="background-color: var(--primary-color); color: white;">
-                                        <tr>
-                                            <th>Area</th>
-                                            <th>NDVI</th>
-                                            <th>EVI</th>
-                                            <th>Land Cover</th>
-                                            <th>Urbanization</th>
-                                            <th>Data Source</th>
-                                            <th>Image Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for stats in area_stats %}
-                                        {% set area_data = data[stats.key] %}
-                                        <tr>
-                                            <td><strong>{{ stats.name }}</strong></td>
-                                            <td>{{ "%.3f"|format(area_data.modis_vegetation.ndvi) }}</td>
-                                            <td>{{ "%.3f"|format(area_data.modis_vegetation.evi) }}</td>
-                                            <td>{{ area_data.modis_land_cover.land_cover_type }}</td>
-                                            <td>{{ area_data.urbanization_level }}</td>
-                                            <td>{{ area_data.modis_vegetation.source }}</td>
-                                            <td>{{ area_data.landsat_metadata.acquisition_date }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -404,7 +394,7 @@
                 <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary me-2">
                     ← Back to Dashboard
                 </a>
-                <a href="{{ url_for('satellite_analysis') }}" class="btn btn-primary me-2">
+                <a href="{{ url_for('satellite') }}" class="btn btn-primary me-2">
                     View Satellite Data →
                 </a>
                 <a href="{{ url_for('download_csv') }}" class="btn btn-success">
