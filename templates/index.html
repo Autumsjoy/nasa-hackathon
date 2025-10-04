@@ -364,7 +364,7 @@
                             <strong style="color: var(--success);">{{ "%.1f"|format(area_data.energy_index) }}</strong>
                         </div>
                     </div>
-                    <a href="{{ url_for('area_analysis', area_key=area_key) }}" class="btn btn-primary-custom btn-sm w-100 mt-3">
+                    <a href="{{ url_for('area_detailed_analysis', area_key=area_key) }}" class="btn btn-primary-custom btn-sm w-100 mt-3">
                         View Detailed Analysis
                     </a>
                 </div>
@@ -463,7 +463,7 @@
                         </h5>
                         <p><strong>Type:</strong> ${area.type}</p>
                         <p><strong>Score:</strong> <span style="color: ${color}; font-weight: bold;">${area.score}</span></p>
-                        <a href="/analysis/${area.key}" class="btn btn-primary-custom btn-sm w-100">View Detailed Analysis</a>
+                        <a href="/area/${area.key}/detailed" class="btn btn-primary-custom btn-sm w-100">View Detailed Analysis</a>
                     </div>
                 `)
                 .bindTooltip(`${area.name} - Score: ${area.score}`);

@@ -81,6 +81,7 @@
                     <a class="nav-link active" href="{{ url_for('satellite') }}">Satellite Data</a>
                     <a class="nav-link" href="{{ url_for('heatmaps') }}">Heat Maps</a>
                     <a class="nav-link" href="{{ url_for('satellite_3d') }}">3D Map</a>
+                   <a class="nav-link" href="{{ url_for('satellite_analysis_comprehensive') }}">Satellite Analysis</a>
                 </div>
             </div>
         </div>
@@ -99,7 +100,7 @@
                         <a href="{{ url_for('satellite_3d') }}" class="btn btn-outline-light">
                             🌍 3D Satellite View
                         </a>
-                        <a href="{{ url_for('download_satellite_data') }}" class="btn btn-light">
+                        <a href="{{ url_for('download_csv') }}" class="btn btn-light">
                             📥 Download Data
                         </a>
                     </div>
@@ -435,7 +436,7 @@
                                             <a href="{{ url_for('satellite_3d') }}" class="btn btn-primary">
                                                 <i class="fas fa-globe me-2"></i>Explore 3D Satellite View
                                             </a>
-                                            <a href="{{ url_for('download_satellite_data') }}" class="btn btn-outline-primary">
+                                            <a href="{{ url_for('download_csv') }}" class="btn btn-outline-primary">
                                                 <i class="fas fa-download me-2"></i>Download Satellite Data (CSV)
                                             </a>
                                             <a href="{{ url_for('api_analysis') }}" class="btn btn-outline-secondary">

@@ -3,16 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Satellite Visualization | NASA Hackathon</title>
-    
-    <!-- Cesium JS -->
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.109/Build/Cesium/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.109/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-    
-    <!-- Bootstrap CSS -->
+    <title>3D Satellite View | NASA Hackathon</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.109/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.109/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #50589C;
@@ -23,445 +18,438 @@
         }
         
         body {
-            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color)) !important;
         }
         
         #cesiumContainer {
             width: 100%;
-            height: 70vh;
+            height: calc(100vh - 76px);
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(80, 88, 156, 0.2);
         }
         
-        .controls-panel {
+        .info-panel {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            width: 350px;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
+            border-radius: 15px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(80, 88, 156, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
         }
         
-        .satellite-info {
+        .area-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .area-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(80, 88, 156, 0.2);
+        }
+        
+        .area-card.active {
+            border-left-color: var(--accent-color);
+            background: linear-gradient(135deg, #f8f9ff, #ffffff);
+        }
+        
+        .score-badge {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
         }
         
-        .cesium-button {
-            background-color: var(--primary-color);
-            border: none;
+        .control-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+        }
+        
+        .btn-3d {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
             margin: 5px;
-            font-weight: 600;
             transition: all 0.3s ease;
         }
         
-        .cesium-button:hover {
-            background-color: var(--primary-dark);
+        .btn-3d:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(80, 88, 156, 0.3);
+            box-shadow: 0 5px 15px rgba(80, 88, 156, 0.4);
         }
         
-        .stats-card {
+        .legend {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             padding: 15px;
-            margin: 10px 0;
-            border-left: 4px solid var(--primary-color);
-            color: var(--primary-color);
+            margin-top: 15px;
         }
         
-        .navbar {
-            background: white !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
         }
         
-        .nav-link.active {
-            color: var(--primary-color) !important;
-            font-weight: 600;
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(80, 88, 156, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 2000;
         }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}" style="color: var(--primary-color);">
-                <i class="fas fa-satellite me-2"></i>NASA Urban Planning
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                <i class="fas fa-globe-americas me-2"></i>
+                NASA 3D Satellite View
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="navbar-nav ms-auto">
-                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
-                    <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
-                    <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
-                    <a class="nav-link" href="{{ url_for('satellite') }}">Satellite Data</a>
-                    <a class="nav-link" href="{{ url_for('heatmaps') }}">Heat Maps</a>
-                    <a class="nav-link active" href="{{ url_for('satellite_3d') }}">3D Map</a>
-                </div>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('satellite') }}">
+                    <i class="fas fa-satellite me-1"></i> 2D View
+                </a>
+                <a class="nav-link" href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-chart-bar me-1"></i> Dashboard
+                </a>
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-home me-1"></i> Home
+                </a>
+                <a class="nav-link" href="{{ url_for('satellite_analysis_comprehensive') }}">Satellite Analysis</a>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container my-5">
-        <div class="row">
-            <div class="col-12 text-center mb-5">
-                <h1 class="display-4 fw-bold" style="color: var(--primary-color);">
-                    <i class="fas fa-globe-americas me-3"></i>3D Satellite Visualization
-                </h1>
-                <p class="lead">Real-time satellite tracking and urban planning data in immersive 3D</p>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-border text-light mb-3" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h4>Loading 3D Satellite View</h4>
+        <p class="text-center">Initializing Cesium JS and loading terrain data...</p>
+        <small class="text-muted">This may take a few moments</small>
+    </div>
+
+    <!-- Cesium Container -->
+    <div id="cesiumContainer"></div>
+
+    <!-- Info Panel -->
+    <div class="info-panel">
+        <h5 class="mb-3" style="color: var(--primary-color);">
+            <i class="fas fa-map-marked-alt me-2"></i>
+            Bhopal Areas Overview
+        </h5>
+        
+        <div class="areas-list">
+            {% for area_key, area_data in data.items() %}
+            <div class="area-card" data-area-key="{{ area_key }}" 
+                 data-lat="{{ area_data.latitude if area_data.latitude else 23.2599 }}" 
+                 data-lon="{{ area_data.longitude if area_data.longitude else 77.4126 }}"
+                 data-score="{{ area_data.sustainability_score }}">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="fw-bold mb-0">{{ area_data.name }}</h6>
+                    <span class="score-badge">{{ "%.1f"|format(area_data.sustainability_score) }}</span>
+                </div>
+                <p class="text-muted small mb-2">{{ area_data.type }}</p>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <small class="text-muted d-block">🌿</small>
+                        <strong style="color: #27AE60; font-size: 0.8rem;">{{ "%.1f"|format(area_data.vegetation_index * 100) }}%</strong>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted d-block">🏭</small>
+                        <strong style="color: #E74C3C; font-size: 0.8rem;">{{ "%.1f"|format(area_data.pollution_index) }}</strong>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted d-block">🔋</small>
+                        <strong style="color: #FF6B35; font-size: 0.8rem;">{{ "%.1f"|format(area_data.energy_index) }}</strong>
+                    </div>
+                </div>
             </div>
+            {% endfor %}
         </div>
 
-        <!-- Controls Panel -->
-        <div class="controls-panel">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h5 style="color: var(--primary-color);">
-                        <i class="fas fa-satellite me-2"></i>Satellite & Urban Data Controls
-                    </h5>
-                    <p class="mb-0">Add satellite visualizations and urban planning data layers</p>
-                </div>
-                <div class="col-md-4 text-end">
-                    <button class="cesium-button" onclick="addSatellite()">
-                        <i class="fas fa-satellite me-2"></i>Add Satellite
-                    </button>
-                    <button class="cesium-button" onclick="addISS()">
-                        <i class="fas fa-space-shuttle me-2"></i>Add ISS
-                    </button>
-                    <button class="cesium-button" onclick="addBhopalData()">
-                        <i class="fas fa-city me-2"></i>Add Bhopal Data
-                    </button>
-                    <button class="cesium-button" onclick="clearAll()" style="background-color: var(--secondary-color);">
-                        <i class="fas fa-trash me-2"></i>Clear All
-                    </button>
-                </div>
+        <!-- Legend -->
+        <div class="legend">
+            <h6 class="mb-3">Sustainability Score</h6>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #27AE60;"></div>
+                <span>Excellent (70-100)</span>
             </div>
-        </div>
-
-        <!-- Cesium Container -->
-        <div id="cesiumContainer"></div>
-
-        <!-- Information Panel -->
-        <div class="satellite-info">
-            <div class="row">
-                <div class="col-md-6">
-                    <h4><i class="fas fa-info-circle me-2"></i>Live Satellite & Urban Data</h4>
-                    <p>Track satellites in real-time and visualize urban planning data with accurate 3D visualization.</p>
-                    <div class="mt-3">
-                        <small><i class="fas fa-lightbulb me-2"></i>Tip: Use mouse to rotate, scroll to zoom, and right-click to pan</small>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="stats-card">
-                                <h6><i class="fas fa-satellite me-2"></i>Active Satellites</h6>
-                                <h3 id="satelliteCount">0</h3>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stats-card">
-                                <h6><i class="fas fa-map-marker-alt me-2"></i>Urban Markers</h6>
-                                <h3 id="urbanMarkerCount">0</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #E67E22;"></div>
+                <span>Good (50-69)</span>
             </div>
-        </div>
-
-        <!-- Features Grid -->
-        <div class="row mt-5">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center p-4">
-                        <div class="mb-3" style="color: var(--primary-color); font-size: 2.5rem;">
-                            <i class="fas fa-globe-americas"></i>
-                        </div>
-                        <h5 style="color: var(--primary-color);">Global Coverage</h5>
-                        <p class="text-muted">View satellites and urban data across the entire globe with high-resolution terrain data from NASA.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center p-4">
-                        <div class="mb-3" style="color: var(--accent-color); font-size: 2.5rem;">
-                            <i class="fas fa-satellite"></i>
-                        </div>
-                        <h5 style="color: var(--accent-color);">Real-time Tracking</h5>
-                        <p class="text-muted">Monitor satellite positions and orbits with accurate real-time data simulation.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center p-4">
-                        <div class="mb-3" style="color: var(--secondary-color); font-size: 2.5rem;">
-                            <i class="fas fa-city"></i>
-                        </div>
-                        <h5 style="color: var(--secondary-color);">Urban Planning</h5>
-                        <p class="text-muted">Visualize urban data and sustainability metrics in 3D for better planning insights.</p>
-                    </div>
-                </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #E74C3C;"></div>
+                <span>Needs Improvement (0-49)</span>
             </div>
         </div>
     </div>
 
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <h6 class="mb-3">Map Controls</h6>
+        <div class="d-flex flex-wrap">
+            <button class="btn btn-3d" id="resetView">
+                <i class="fas fa-home me-1"></i> Reset View
+            </button>
+            <button class="btn btn-3d" id="toggleTerrain">
+                <i class="fas fa-mountain me-1"></i> Toggle Terrain
+            </button>
+            <button class="btn btn-3d" id="toggleBuildings">
+                <i class="fas fa-city me-1"></i> Toggle Buildings
+            </button>
+            <button class="btn btn-3d" id="flyToBest">
+                <i class="fas fa-trophy me-1"></i> Best Area
+            </button>
+        </div>
+    </div>
+
     <script>
-        // Initialize Cesium with a free community token
-        // Note: For production, get a free token from: https://cesium.com/ion/
+        // Your Cesium Ion access token
         Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1N2QxMy02MWZjLTQ3ODktODgyYS1jYjJkMjY0MWE1MWUiLCJpZCI6MjA0MzA2LCJpYXQiOjE3MTE4MTU5ODN9.8a3m9QuT3Xx1p1z0Y7W0vVQ6t6X3Y3Q2Q3X3Y3Q2Q3X3Y3Q2Q3X3Y3Q';
-        
+
         // Initialize the Cesium Viewer
         const viewer = new Cesium.Viewer('cesiumContainer', {
-            terrain: Cesium.Terrain.fromWorldTerrain(),
-            timeline: false,
-            animation: false,
-            homeButton: true,
-            geocoder: true,
+            terrainProvider: Cesium.createWorldTerrain(),
             baseLayerPicker: true,
+            homeButton: false,
             sceneModePicker: true,
             navigationHelpButton: false,
+            animation: false,
+            timeline: false,
             fullscreenButton: true,
-            skyAtmosphere: false,
-            requestRenderMode: true,
-            maximumRenderTimeChange: Infinity
+            geocoder: true,
+            scene3DOnly: false,
+            selectionIndicator: false,
+            infoBox: false
         });
 
-        // Set initial view to show India/Bhopal region
+        // Set initial view to Bhopal
         viewer.camera.setView({
-            destination: Cesium.Cartesian3.fromDegrees(77.4126, 23.2599, 800000.0), // Bhopal coordinates
+            destination: Cesium.Cartesian3.fromDegrees(77.4126, 23.2599, 5000.0),
             orientation: {
                 heading: 0.0,
-                pitch: -1.2,
+                pitch: -0.5,
                 roll: 0.0
             }
         });
 
-        // Data storage
-        let satellites = [];
-        let urbanMarkers = [];
-        let satelliteCounter = 0;
-        let urbanMarkerCounter = 0;
+        // Bhopal areas data
+        const areas = [
+            {% for area_key, area_data in data.items() %}
+            {
+                key: "{{ area_key }}",
+                name: "{{ area_data.name }}",
+                lat: {{ area_data.latitude if area_data.latitude else 23.2599 }},
+                lon: {{ area_data.longitude if area_data.longitude else 77.4126 }},
+                score: {{ area_data.sustainability_score }},
+                type: "{{ area_data.type }}",
+                vegetation: {{ area_data.vegetation_index }},
+                pollution: {{ area_data.pollution_index }},
+                energy: {{ area_data.energy_index }},
+                description: "{{ area_data.description if area_data.description else 'Urban area in Bhopal' }}"
+            },
+            {% endfor %}
+        ];
 
-        // Function to update counters
-        function updateCounts() {
-            document.getElementById('satelliteCount').textContent = satellites.length;
-            document.getElementById('urbanMarkerCount').textContent = urbanMarkers.length;
-        }
+        // Add area entities to the map
+        areas.forEach(area => {
+            // Determine color based on sustainability score
+            let color;
+            if (area.score >= 70) {
+                color = Cesium.Color.fromCssColorString('#27AE60'); // Green
+            } else if (area.score >= 50) {
+                color = Cesium.Color.fromCssColorString('#E67E22'); // Orange
+            } else {
+                color = Cesium.Color.fromCssColorString('#E74C3C'); // Red
+            }
 
-        // Function to add a sample satellite
-        function addSatellite() {
-            satelliteCounter++;
-            const longitude = 77 + Math.random() * 10 - 5; // Around Bhopal longitude
-            const latitude = 23 + Math.random() * 6 - 3;   // Around Bhopal latitude
-            const height = 400000 + Math.random() * 200000;
-            
-            const satellite = viewer.entities.add({
-                position: Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
-                name: `Satellite-${satelliteCounter}`,
-                description: `
-                    <div style="background: white; padding: 15px; border-radius: 8px; max-width: 300px;">
-                        <h4 style="color: ${getComputedStyle(document.documentElement).getPropertyValue('--primary-color')}; margin-bottom: 10px;">
-                            <i class="fas fa-satellite"></i> Satellite-${satelliteCounter}
-                        </h4>
-                        <p><strong>Altitude:</strong> ${Math.round(height/1000)} km</p>
-                        <p><strong>Type:</strong> Earth Observation</p>
-                        <p><strong>Status:</strong> Active</p>
-                        <p><strong>Purpose:</strong> Urban Planning & Environmental Monitoring</p>
-                    </div>
-                `,
+            // Create point entity
+            const entity = viewer.entities.add({
+                name: area.name,
+                position: Cesium.Cartesian3.fromDegrees(area.lon, area.lat, 100),
                 point: {
                     pixelSize: 15,
-                    color: Cesium.Color.fromCssColorString(getComputedStyle(document.documentElement).getPropertyValue('--primary-color')),
+                    color: color,
                     outlineColor: Cesium.Color.WHITE,
-                    outlineWidth: 3
+                    outlineWidth: 2,
+                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
                 },
                 label: {
-                    text: `SAT-${satelliteCounter}`,
-                    font: '16pt sans-serif',
-                    fillColor: Cesium.Color.fromCssColorString(getComputedStyle(document.documentElement).getPropertyValue('--primary-color')),
-                    outlineColor: Cesium.Color.WHITE,
+                    text: area.name,
+                    font: '14pt Arial',
+                    fillColor: Cesium.Color.WHITE,
+                    outlineColor: Cesium.Color.BLACK,
                     outlineWidth: 2,
                     pixelOffset: new Cesium.Cartesian2(0, -40),
-                    showBackground: true,
-                    backgroundColor: Cesium.Color.fromCssColorString('#FFFFFF'),
-                    backgroundPadding: new Cesium.Cartesian2(8, 8)
+                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
                 },
-                path: {
-                    resolution: 1,
-                    material: new Cesium.PolylineGlowMaterialProperty({
-                        glowPower: 0.3,
-                        color: Cesium.Color.fromCssColorString(getComputedStyle(document.documentElement).getPropertyValue('--primary-color'))
-                    }),
-                    width: 4
-                }
-            });
-            
-            satellites.push(satellite);
-            updateCounts();
-            animateSatellite(satellite, longitude, latitude, height);
-        }
-
-        // Function to add International Space Station
-        function addISS() {
-            const iss = viewer.entities.add({
-                position: Cesium.Cartesian3.fromDegrees(77.0, 25.0, 408000), // Near Bhopal
-                name: 'International Space Station',
                 description: `
-                    <div style="background: white; padding: 15px; border-radius: 8px; max-width: 300px;">
-                        <h4 style="color: #FF6B35; margin-bottom: 10px;">
-                            <i class="fas fa-space-shuttle"></i> International Space Station
-                        </h4>
-                        <p><strong>Altitude:</strong> 408 km</p>
-                        <p><strong>Speed:</strong> 7.66 km/s</p>
-                        <p><strong>Crew:</strong> 7 Astronauts</p>
-                        <p><strong>Mission:</strong> Scientific Research & Earth Observation</p>
+                    <div style="max-width: 300px;">
+                        <h3 style="color: #50589C; border-bottom: 2px solid #50589C; padding-bottom: 10px; margin-bottom: 15px;">
+                            ${area.name}
+                        </h3>
+                        <div style="background: ${color.toCssColorString()}; color: white; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px;">
+                            <strong>Sustainability Score: ${area.score.toFixed(1)}/100</strong>
+                        </div>
+                        <table style="width: 100%; font-size: 12px;">
+                            <tr>
+                                <td><strong>Type:</strong></td>
+                                <td>${area.type}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Vegetation Index:</strong></td>
+                                <td>${(area.vegetation * 100).toFixed(1)}%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pollution Index:</strong></td>
+                                <td>${area.pollution.toFixed(1)}/10</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Energy Index:</strong></td>
+                                <td>${area.energy.toFixed(1)}/10</td>
+                            </tr>
+                        </table>
+                        <div style="margin-top: 15px; text-align: center;">
+                            <a href="/analysis/${area.key}" style="background: #50589C; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; font-size: 12px;">
+                                View Detailed Analysis
+                            </a>
+                        </div>
                     </div>
-                `,
-                point: {
-                    pixelSize: 20,
-                    color: Cesium.Color.fromCssColorString(getComputedStyle(document.documentElement).getPropertyValue('--secondary-color')),
-                    outlineColor: Cesium.Color.WHITE,
-                    outlineWidth: 3
-                },
-                label: {
-                    text: 'ISS',
-                    font: '18pt sans-serif',
-                    fillColor: Cesium.Color.fromCssColorString(getComputedStyle(document.documentElement).getPropertyValue('--secondary-color')),
-                    outlineColor: Cesium.Color.WHITE,
-                    outlineWidth: 2,
-                    pixelOffset: new Cesium.Cartesian2(0, -50)
-                },
-                path: {
-                    resolution: 1,
-                    material: new Cesium.PolylineGlowMaterialProperty({
-                        glowPower: 0.4,
-                        color: Cesium.Color.fromCssColorString(getComputedStyle(document.documentElement).getPropertyValue('--secondary-color'))
-                    }),
-                    width: 5
+                `
+            });
+
+            // Add billboard for better visibility
+            viewer.entities.add({
+                position: Cesium.Cartesian3.fromDegrees(area.lon, area.lat, 150),
+                billboard: {
+                    image: `data:image/svg+xml;base64,${btoa(`
+                        <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="16" cy="16" r="14" fill="${color.toCssColorString()}" stroke="white" stroke-width="2"/>
+                            <circle cx="16" cy="16" r="6" fill="white"/>
+                        </svg>
+                    `)}`,
+                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    scale: 0.8
                 }
             });
-            
-            satellites.push(iss);
-            updateCounts();
-            animateSatellite(iss, 77.0, 25.0, 408000, 2.0);
-        }
+        });
 
-        // Function to add Bhopal urban data
-        function addBhopalData() {
-            const bhopalAreas = [
-                { name: "Old Bhopal", lon: 77.4126, lat: 23.2599, type: "Heritage", color: "#FF6B35" },
-                { name: "New Bhopal", lon: 77.4357, lat: 23.2278, type: "Residential", color: "#4ECDC4" },
-                { name: "Industrial Area", lon: 77.4500, lat: 23.2000, type: "Industrial", color: "#E74C3C" },
-                { name: "Lake Area", lon: 77.4000, lat: 23.2667, type: "Environmental", color: "#27AE60" },
-                { name: "Kolar Road", lon: 77.4333, lat: 23.1667, type: "Suburban", color: "#3498DB" }
-            ];
-
-            bhopalAreas.forEach(area => {
-                urbanMarkerCounter++;
-                const marker = viewer.entities.add({
-                    position: Cesium.Cartesian3.fromDegrees(area.lon, area.lat, 0),
-                    name: area.name,
-                    description: `
-                        <div style="background: white; padding: 15px; border-radius: 8px; max-width: 300px;">
-                            <h4 style="color: ${area.color}; margin-bottom: 10px;">
-                                <i class="fas fa-map-marker-alt"></i> ${area.name}
-                            </h4>
-                            <p><strong>Type:</strong> ${area.type}</p>
-                            <p><strong>Coordinates:</strong> ${area.lat.toFixed(4)}°N, ${area.lon.toFixed(4)}°E</p>
-                            <p><strong>Focus:</strong> Urban Planning & Sustainability Analysis</p>
-                        </div>
-                    `,
-                    point: {
-                        pixelSize: 12,
-                        color: Cesium.Color.fromCssColorString(area.color),
-                        outlineColor: Cesium.Color.WHITE,
-                        outlineWidth: 2
-                    },
-                    label: {
-                        text: area.name,
-                        font: '14pt sans-serif',
-                        fillColor: Cesium.Color.fromCssColorString(area.color),
-                        outlineColor: Cesium.Color.WHITE,
-                        outlineWidth: 2,
-                        pixelOffset: new Cesium.Cartesian2(0, -30)
+        // Event handlers for area cards
+        document.querySelectorAll('.area-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const lat = parseFloat(this.dataset.lat);
+                const lon = parseFloat(this.dataset.lon);
+                const areaKey = this.dataset.areaKey;
+                
+                // Fly to the area
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(lon, lat, 2000.0),
+                    duration: 2.0,
+                    orientation: {
+                        heading: 0.0,
+                        pitch: -0.5,
+                        roll: 0.0
                     }
                 });
-                
-                urbanMarkers.push(marker);
-            });
-            
-            updateCounts();
-        }
 
-        // Function to animate satellites
-        function animateSatellite(entity, startLon, startLat, height, speedMultiplier = 1) {
-            const startTime = Cesium.JulianDate.now();
-            const stopTime = Cesium.JulianDate.addSeconds(startTime, 3600, new Cesium.JulianDate());
-            
-            viewer.clock.startTime = startTime.clone();
-            viewer.clock.stopTime = stopTime.clone();
-            viewer.clock.currentTime = startTime.clone();
-            viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
-            viewer.clock.multiplier = 10 * speedMultiplier;
-            
-            if (viewer.timeline) {
-                viewer.timeline.zoomTo(startTime, stopTime);
-            }
-            
-            entity.position = new Cesium.SampledPositionProperty();
-            
-            for (let i = 0; i <= 360; i += 15) {
-                const time = Cesium.JulianDate.addSeconds(startTime, i * 2, new Cesium.JulianDate());
-                const longitude = startLon + Math.sin(Cesium.Math.toRadians(i)) * 2;
-                const latitude = startLat + Math.cos(Cesium.Math.toRadians(i)) * 1.5;
-                
-                const position = Cesium.Cartesian3.fromDegrees(longitude, latitude, height);
-                entity.position.addSample(time, position);
-            }
-        }
-
-        // Function to clear all entities
-        function clearAll() {
-            satellites.forEach(satellite => {
-                viewer.entities.remove(satellite);
+                // Highlight the card
+                document.querySelectorAll('.area-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
             });
-            urbanMarkers.forEach(marker => {
-                viewer.entities.remove(marker);
-            });
-            satellites = [];
-            urbanMarkers = [];
-            updateCounts();
-        }
-
-        // Add some initial data when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                addSatellite();
-                addISS();
-                addBhopalData();
-            }, 1000);
         });
-    </script>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        // Control panel event handlers
+        document.getElementById('resetView').addEventListener('click', function() {
+            viewer.camera.flyTo({
+                destination: Cesium.Cartesian3.fromDegrees(77.4126, 23.2599, 5000.0),
+                duration: 2.0
+            });
+        });
+
+        document.getElementById('toggleTerrain').addEventListener('click', function() {
+            viewer.terrainProvider = viewer.terrainProvider === Cesium.createWorldTerrain() 
+                ? new Cesium.EllipsoidTerrainProvider() 
+                : Cesium.createWorldTerrain();
+        });
+
+        document.getElementById('toggleBuildings').addEventListener('click', function() {
+            // Toggle building visibility (simplified)
+            const buildings = viewer.scene.primitives.add(new Cesium.Cesium3DTileset({
+                url: Cesium.IonResource.fromAssetId(96188)
+            }));
+            buildings.show = !buildings.show;
+        });
+
+        document.getElementById('flyToBest').addEventListener('click', function() {
+            const bestArea = areas.reduce((best, current) => 
+                current.score > best.score ? current : best
+            );
+            
+            viewer.camera.flyTo({
+                destination: Cesium.Cartesian3.fromDegrees(bestArea.lon, bestArea.lat, 1500.0),
+                duration: 2.5
+            });
+        });
+
+        // Hide loading overlay when ready
+        viewer.scene.postRender.addEventListener(function() {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }, 2000);
+        });
+
+        // Error handling
+        viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+        console.log('3D Satellite View initialized successfully');
+    </script>
 </body>
 </html>
