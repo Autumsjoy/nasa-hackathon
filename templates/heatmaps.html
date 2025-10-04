@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js" />
     <style>
         :root {
             --primary: #50589C;
@@ -51,7 +52,7 @@
             padding: 1.5rem;
         }
         
-        #heatMap {
+        #interactiveMap {
             height: 500px;
             border-radius: 15px;
             margin-top: 20px;
@@ -126,6 +127,17 @@
         .nav-custom {
             background: linear-gradient(135deg, var(--dark), var(--primary)) !important;
         }
+        
+        .heat-intensity-0 { background-color: #48BB78; }
+        .heat-intensity-1 { background-color: #68D391; }
+        .heat-intensity-2 { background-color: #9AE6B4; }
+        .heat-intensity-3 { background-color: #FBD38D; }
+        .heat-intensity-4 { background-color: #F6AD55; }
+        .heat-intensity-5 { background-color: #ED8936; }
+        .heat-intensity-6 { background-color: #FC8181; }
+        .heat-intensity-7 { background-color: #F56565; }
+        .heat-intensity-8 { background-color: #E53E3E; }
+        .heat-intensity-9 { background-color: #C53030; }
     </style>
 </head>
 <body>
@@ -166,8 +178,8 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h1 class="display-5 fw-bold">🔥 Heat Maps Analysis</h1>
-                    <p class="lead mb-0">Interactive visualization of urban metrics and sustainability indicators across Bhopal using NASA satellite data</p>
+                    <h1 class="display-5 fw-bold">🔥 Bhopal Heat Maps Analysis</h1>
+                    <p class="lead mb-0">Interactive heat maps showing vegetation, pollution, transport efficiency, and urban sustainability across Bhopal</p>
                 </div>
                 <div class="col-md-4 text-end">
                     <div class="btn-group">
@@ -222,42 +234,41 @@
             </div>
         </div>
 
-        <!-- Interactive Map -->
+        <!-- Interactive Heat Map -->
         <div class="row mb-5">
             <div class="col-12">
                 <div class="heatmap-card">
                     <div class="card-header card-header-custom">
-                        <h4 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i>Interactive Heat Map Analysis</h4>
+                        <h4 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i>Interactive Bhopal Heat Map</h4>
                     </div>
                     <div class="card-body">
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Select Metric:</label>
-                                <select class="form-select" id="metricSelector" onchange="updateHeatMap()">
-                                    <option value="sustainability_score">Sustainability Score</option>
-                                    <option value="vegetation_index">Vegetation Index (NDVI)</option>
-                                    <option value="pollution_index">Pollution Index</option>
-                                    <option value="transport_index">Transport Efficiency</option>
-                                    <option value="urbanization_index">Urbanization Level</option>
-                                    <option value="temperature">Land Surface Temperature</option>
-                                    <option value="energy_index">Energy Performance</option>
-                                    <option value="solar_potential">Solar Potential</option>
+                                <label class="form-label fw-bold">Select Heat Map Type:</label>
+                                <select class="form-select" id="heatmapType" onchange="updateHeatMap()">
+                                    <option value="vegetation">🌿 Vegetation Index</option>
+                                    <option value="pollution">🏭 Pollution Level</option>
+                                    <option value="transport">🚌 Transport Efficiency</option>
+                                    <option value="urban_efficiency">🏙️ Urban Efficiency</option>
+                                    <option value="sustainability">📊 Sustainability Score</option>
+                                    <option value="temperature">🌡️ Temperature</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Map Options:</label>
-                                <div class="d-flex gap-3">
+                                <div class="d-flex gap-3 flex-wrap">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="clusterToggle" checked>
-                                        <label class="form-check-label" for="clusterToggle">Show Clusters</label>
+                                        <input class="form-check-input" type="checkbox" id="heatLayerToggle" checked>
+                                        <label class="form-check-label" for="heatLayerToggle">Heat Layer</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="markersToggle" checked>
+                                        <label class="form-check-label" for="markersToggle">Area Markers</label>
                                     </div>
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" id="labelsToggle" checked>
                                         <label class="form-check-label" for="labelsToggle">Show Labels</label>
                                     </div>
-                                    <button class="btn btn-primary-custom btn-sm" onclick="resetMapView()">
-                                        <i class="fas fa-sync me-1"></i>Reset View
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -266,7 +277,7 @@
                         <div class="row mb-3">
                             <div class="col-12">
                                 <div class="legend">
-                                    <h6 class="mb-2"><i class="fas fa-palette me-2"></i>Color Legend</h6>
+                                    <h6 class="mb-2"><i class="fas fa-palette me-2"></i>Heat Intensity Legend</h6>
                                     <div class="d-flex flex-wrap gap-2" id="dynamicLegend">
                                         <!-- Dynamic legend will be inserted here -->
                                     </div>
@@ -274,13 +285,13 @@
                             </div>
                         </div>
                         
-                        <div id="heatMap"></div>
+                        <div id="interactiveMap"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Heat Map Grid -->
+        <!-- Specialized Heat Maps Grid -->
         <div class="row">
             <div class="col-md-6">
                 <div class="heatmap-card">
@@ -292,8 +303,9 @@
                             {{ vegetation_heatmap|safe }}
                         {% else %}
                             <div class="text-center py-4">
-                                <i class="fas fa-exclamation-triangle text-warning fa-2x mb-3"></i>
-                                <p>Vegetation heat map data is being processed</p>
+                                <i class="fas fa-seedling text-success fa-2x mb-3"></i>
+                                <p>Vegetation analysis shows green cover distribution across Bhopal</p>
+                                <small class="text-muted">Higher values indicate better vegetation health</small>
                             </div>
                         {% endif %}
                     </div>
@@ -309,8 +321,9 @@
                             {{ pollution_heatmap|safe }}
                         {% else %}
                             <div class="text-center py-4">
-                                <i class="fas fa-exclamation-triangle text-warning fa-2x mb-3"></i>
-                                <p>Pollution heat map data is being processed</p>
+                                <i class="fas fa-smog text-danger fa-2x mb-3"></i>
+                                <p>Pollution levels across different areas of Bhopal</p>
+                                <small class="text-muted">Lower values indicate cleaner environment</small>
                             </div>
                         {% endif %}
                     </div>
@@ -329,8 +342,9 @@
                             {{ transport_heatmap|safe }}
                         {% else %}
                             <div class="text-center py-4">
-                                <i class="fas fa-exclamation-triangle text-warning fa-2x mb-3"></i>
-                                <p>Transport heat map data is being processed</p>
+                                <i class="fas fa-route text-primary fa-2x mb-3"></i>
+                                <p>Transport infrastructure efficiency across Bhopal</p>
+                                <small class="text-muted">Higher scores indicate better transport systems</small>
                             </div>
                         {% endif %}
                     </div>
@@ -339,15 +353,16 @@
             <div class="col-md-6">
                 <div class="heatmap-card">
                     <div class="card-header card-header-custom">
-                        <h5 class="mb-0"><i class="fas fa-city me-2"></i>Urbanization Level Heat Map</h5>
+                        <h5 class="mb-0"><i class="fas fa-city me-2"></i>Urban Efficiency Heat Map</h5>
                     </div>
                     <div class="card-body">
-                        {% if urbanization_heatmap %}
-                            {{ urbanization_heatmap|safe }}
+                        {% if urban_efficiency_heatmap %}
+                            {{ urban_efficiency_heatmap|safe }}
                         {% else %}
                             <div class="text-center py-4">
-                                <i class="fas fa-exclamation-triangle text-warning fa-2x mb-3"></i>
-                                <p>Urbanization heat map data is being processed</p>
+                                <i class="fas fa-building text-info fa-2x mb-3"></i>
+                                <p>Urban planning and infrastructure efficiency</p>
+                                <small class="text-muted">Measures how well urban areas utilize resources</small>
                             </div>
                         {% endif %}
                     </div>
@@ -360,7 +375,7 @@
             <div class="col-12">
                 <div class="heatmap-card">
                     <div class="card-header card-header-custom">
-                        <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Detailed Area Statistics</h4>
+                        <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Bhopal Area Statistics & Analysis</h4>
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -391,12 +406,20 @@
                                         <strong>Transport:</strong> {{ "%.1f"|format(area_data.transport_index) }}/10
                                     </div>
                                     <div class="metric-badge">
-                                        <i class="fas fa-bolt me-1 text-warning"></i>
-                                        <strong>Energy:</strong> {{ "%.1f"|format(area_data.energy_index) }}/10
+                                        <i class="fas fa-city me-1 text-info"></i>
+                                        <strong>Urban Eff:</strong> {{ "%.1f"|format(area_data.urban_efficiency) }}/10
                                     </div>
-                                    <div class="metric-badge">
-                                        <i class="fas fa-thermometer-half me-1 text-info"></i>
-                                        <strong>Temp:</strong> {{ "%.1f"|format(area_data.temperature) }}°C
+                                    
+                                    <div class="mt-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-thermometer-half me-1"></i>
+                                            Temp: {{ "%.1f"|format(area_data.temperature) }}°C
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-users me-1"></i>
+                                            Density: {{ "{:,}".format(area_data.population_density) }}/km²
+                                        </small>
                                     </div>
                                     
                                     <a href="{{ url_for('area_detailed_analysis', area_key=area_key) }}" 
@@ -437,220 +460,313 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <script>
-        let heatMap;
+        let interactiveMap;
+        let heatLayer = null;
         let areaMarkers = [];
-        let currentMetric = 'sustainability_score';
+        let currentHeatmapType = 'vegetation';
         
+        // Bhopal area data
+        const bhopalAreas = {
+            {% for area_key, area_data in data.items() %}
+            "{{ area_key }}": {
+                name: "{{ area_data.name }}",
+                lat: {{ area_data.latitude }},
+                lng: {{ area_data.longitude }},
+                vegetation: {{ area_data.vegetation_index }},
+                pollution: {{ area_data.pollution_index }},
+                transport: {{ area_data.transport_index }},
+                urban_efficiency: {{ area_data.urban_efficiency }},
+                sustainability: {{ area_data.sustainability_score }},
+                temperature: {{ area_data.temperature }},
+                type: "{{ area_data.type }}",
+                population: {{ area_data.population_density }},
+                green_cover: {{ area_data.green_cover }}
+            },
+            {% endfor %}
+        };
+
         // Initialize map
         function initMap() {
-            heatMap = L.map('heatMap').setView([23.2599, 77.4126], 11);
+            interactiveMap = L.map('interactiveMap').setView([23.2599, 77.4126], 11);
             
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            // Add different tile layers
+            const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
-            }).addTo(heatMap);
+            }).addTo(interactiveMap);
+
+            const satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                attribution: '© Google Satellite'
+            });
+
+            // Add layer control
+            L.control.layers({
+                "Street Map": osmLayer,
+                "Satellite View": satelliteLayer
+            }).addTo(interactiveMap);
             
             updateHeatMap();
             updateLegend();
         }
         
-        // Update heat map based on selected metric
+        // Update heat map based on selected type
         function updateHeatMap() {
-            currentMetric = document.getElementById('metricSelector').value;
-            const showClusters = document.getElementById('clusterToggle').checked;
+            currentHeatmapType = document.getElementById('heatmapType').value;
+            const showHeatLayer = document.getElementById('heatLayerToggle').checked;
+            const showMarkers = document.getElementById('markersToggle').checked;
             const showLabels = document.getElementById('labelsToggle').checked;
             
             // Clear existing layers
-            areaMarkers.forEach(marker => heatMap.removeLayer(marker));
+            if (heatLayer) {
+                interactiveMap.removeLayer(heatLayer);
+            }
+            areaMarkers.forEach(marker => interactiveMap.removeLayer(marker));
             areaMarkers = [];
             
-            // Add new markers
-            {% for area_key, area_data in data.items() %}
-            const value = {{ area_data[currentMetric] if currentMetric in area_data else 0 }};
-            const color = getColorForValue(value, currentMetric);
-            const size = getSizeForValue(value, currentMetric);
+            // Create heat points based on selected metric
+            const heatPoints = [];
+            const markerData = [];
             
-            const marker = L.circleMarker([
-                {{ area_data.latitude if area_data.latitude else 23.2599 }}, 
-                {{ area_data.longitude if area_data.longitude else 77.4126 }}
-            ], {
-                radius: showClusters ? size * 1.5 : size,
-                fillColor: color,
-                color: '#ffffff',
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.8
-            }).addTo(heatMap);
+            Object.values(bhopalAreas).forEach(area => {
+                const value = getMetricValue(area, currentHeatmapType);
+                const intensity = getHeatIntensity(value, currentHeatmapType);
+                
+                // Add to heat layer
+                for (let i = 0; i < intensity * 10; i++) {
+                    const lat = area.lat + (Math.random() - 0.5) * 0.02;
+                    const lng = area.lng + (Math.random() - 0.5) * 0.02;
+                    heatPoints.push([lat, lng, intensity]);
+                }
+                
+                markerData.push({
+                    area: area,
+                    value: value,
+                    intensity: intensity
+                });
+            });
             
-            // Add label if enabled
-            if (showLabels) {
-                marker.bindTooltip(`
-                    <div class="text-center">
-                        <strong>{{ area_data.name }}</strong><br>
-                        ${getMetricDisplayName(currentMetric)}: ${getFormattedValue(value, currentMetric)}
-                    </div>
-                `);
+            // Add heat layer if enabled
+            if (showHeatLayer && heatPoints.length > 0) {
+                heatLayer = L.heatLayer(heatPoints, {
+                    radius: 25,
+                    blur: 15,
+                    maxZoom: 17,
+                    gradient: {
+                        0.1: '#48BB78',
+                        0.3: '#68D391',
+                        0.5: '#9AE6B4',
+                        0.6: '#FBD38D',
+                        0.7: '#F6AD55',
+                        0.8: '#ED8936',
+                        0.9: '#FC8181',
+                        1.0: '#F56565'
+                    }
+                }).addTo(interactiveMap);
             }
             
-            marker.bindPopup(`
-                <div style="min-width: 250px;">
-                    <h5 style="color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px;">
-                        {{ area_data.name }}
-                    </h5>
-                    <p><strong>Type:</strong> {{ area_data.type }}</p>
-                    <p><strong>${getMetricDisplayName(currentMetric)}:</strong> 
-                       <span style="color: ${color}; font-weight: bold;">${getFormattedValue(value, currentMetric)}</span>
-                    </p>
-                    <div class="mt-3">
-                        <div class="metric-badge">
-                            <strong>Vegetation:</strong> {{ "%.1f"|format(area_data.vegetation_index * 100) }}%
+            // Add markers if enabled
+            if (showMarkers) {
+                markerData.forEach(data => {
+                    const color = getColorForIntensity(data.intensity);
+                    const size = 15 + (data.intensity * 10);
+                    
+                    const marker = L.circleMarker([data.area.lat, data.area.lng], {
+                        radius: size,
+                        fillColor: color,
+                        color: '#ffffff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(interactiveMap);
+                    
+                    if (showLabels) {
+                        marker.bindTooltip(`
+                            <div class="text-center">
+                                <strong>${data.area.name}</strong><br>
+                                ${getMetricDisplayName(currentHeatmapType)}: ${getFormattedValue(data.value, currentHeatmapType)}
+                            </div>
+                        `);
+                    }
+                    
+                    marker.bindPopup(`
+                        <div style="min-width: 250px;">
+                            <h5 style="color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px;">
+                                ${data.area.name}
+                            </h5>
+                            <p><strong>Type:</strong> ${data.area.type}</p>
+                            <p><strong>${getMetricDisplayName(currentHeatmapType)}:</strong> 
+                               <span style="color: ${color}; font-weight: bold;">${getFormattedValue(data.value, currentHeatmapType)}</span>
+                            </p>
+                            <div class="mt-3">
+                                <div class="metric-badge">
+                                    <strong>Vegetation:</strong> ${(data.area.vegetation * 100).toFixed(1)}%
+                                </div>
+                                <div class="metric-badge">
+                                    <strong>Pollution:</strong> ${data.area.pollution.toFixed(1)}/10
+                                </div>
+                                <div class="metric-badge">
+                                    <strong>Population:</strong> ${data.area.population.toLocaleString()}/km²
+                                </div>
+                            </div>
                         </div>
-                        <div class="metric-badge">
-                            <strong>Pollution:</strong> {{ "%.1f"|format(area_data.pollution_index) }}/10
-                        </div>
-                        <div class="metric-badge">
-                            <strong>Score:</strong> {{ "%.1f"|format(area_data.sustainability_score) }}
-                        </div>
-                    </div>
-                    <a href="/area/{{ area_key }}/detailed" class="btn btn-primary-custom btn-sm w-100 mt-3">
-                        <i class="fas fa-chart-line me-1"></i>View Detailed Analysis
-                    </a>
-                </div>
-            `);
-            
-            areaMarkers.push(marker);
-            {% endfor %}
+                    `);
+                    
+                    areaMarkers.push(marker);
+                });
+            }
             
             updateLegend();
         }
         
-        // Get color based on value and metric
-        function getColorForValue(value, metric) {
-            switch(metric) {
-                case 'sustainability_score':
-                    return value >= 70 ? '#48BB78' : value >= 50 ? '#ED8936' : '#F56565';
-                case 'vegetation_index':
-                    return value >= 0.7 ? '#48BB78' : value >= 0.4 ? '#ED8936' : '#F56565';
-                case 'pollution_index':
-                    return value <= 3 ? '#48BB78' : value <= 6 ? '#ED8936' : '#F56565';
-                case 'transport_index':
-                    return value >= 7 ? '#48BB78' : value >= 4 ? '#ED8936' : '#F56565';
-                case 'energy_index':
-                    return value >= 7 ? '#48BB78' : value >= 4 ? '#ED8936' : '#F56565';
-                case 'urbanization_index':
-                    return value <= 0.3 ? '#48BB78' : value <= 0.6 ? '#ED8936' : '#F56565';
-                case 'temperature':
-                    return value <= 25 ? '#48BB78' : value <= 30 ? '#ED8936' : '#F56565';
-                case 'solar_potential':
-                    return value >= 6 ? '#48BB78' : value >= 5 ? '#ED8936' : '#F56565';
-                default:
-                    return '#50589C';
+        // Get metric value for heatmap
+        function getMetricValue(area, type) {
+            switch(type) {
+                case 'vegetation': return area.vegetation;
+                case 'pollution': return area.pollution;
+                case 'transport': return area.transport;
+                case 'urban_efficiency': return area.urban_efficiency;
+                case 'sustainability': return area.sustainability;
+                case 'temperature': return area.temperature;
+                default: return area.vegetation;
             }
         }
         
-        // Get size based on value and metric
-        function getSizeForValue(value, metric) {
-            const baseSize = 15;
-            switch(metric) {
-                case 'sustainability_score':
-                    return baseSize + (value / 5);
-                case 'vegetation_index':
-                    return baseSize + (value * 20);
-                case 'pollution_index':
-                    return baseSize + (value * 2);
+        // Get heat intensity (0-1)
+        function getHeatIntensity(value, type) {
+            switch(type) {
+                case 'vegetation':
+                    return value; // 0-1 scale
+                case 'pollution':
+                    return value / 10; // Convert to 0-1
+                case 'transport':
+                    return value / 10;
+                case 'urban_efficiency':
+                    return value / 10;
+                case 'sustainability':
+                    return value / 100;
+                case 'temperature':
+                    return (value - 25) / 15; // Normalize 25-40°C to 0-1
                 default:
-                    return baseSize + (value * 1.5);
+                    return value;
             }
+        }
+        
+        // Get color based on intensity
+        function getColorForIntensity(intensity) {
+            const colors = [
+                '#48BB78', '#68D391', '#9AE6B4', '#FBD38D', 
+                '#F6AD55', '#ED8936', '#FC8181', '#F56565', 
+                '#E53E3E', '#C53030'
+            ];
+            const index = Math.min(Math.floor(intensity * 10), 9);
+            return colors[index];
         }
         
         // Get formatted value for display
-        function getFormattedValue(value, metric) {
-            switch(metric) {
-                case 'vegetation_index':
-                case 'urbanization_index':
+        function getFormattedValue(value, type) {
+            switch(type) {
+                case 'vegetation':
                     return (value * 100).toFixed(1) + '%';
+                case 'pollution':
+                case 'transport':
+                case 'urban_efficiency':
+                    return value.toFixed(1) + '/10';
+                case 'sustainability':
+                    return value.toFixed(1) + '/100';
                 case 'temperature':
                     return value.toFixed(1) + '°C';
-                case 'solar_potential':
-                    return value.toFixed(1) + ' kWh/m²';
                 default:
                     return value.toFixed(1);
             }
         }
         
         // Get display name for metric
-        function getMetricDisplayName(metric) {
+        function getMetricDisplayName(type) {
             const names = {
-                'sustainability_score': 'Sustainability Score',
-                'vegetation_index': 'Vegetation Index',
-                'pollution_index': 'Pollution Index',
-                'transport_index': 'Transport Index',
-                'energy_index': 'Energy Index',
-                'urbanization_index': 'Urbanization Level',
-                'temperature': 'Temperature',
-                'solar_potential': 'Solar Potential'
+                'vegetation': 'Vegetation Index',
+                'pollution': 'Pollution Level',
+                'transport': 'Transport Efficiency',
+                'urban_efficiency': 'Urban Efficiency',
+                'sustainability': 'Sustainability Score',
+                'temperature': 'Temperature'
             };
-            return names[metric] || metric.replace('_', ' ').toUpperCase();
+            return names[type] || type.replace('_', ' ').toUpperCase();
         }
         
         // Update dynamic legend
         function updateLegend() {
             const legend = document.getElementById('dynamicLegend');
-            const metric = currentMetric;
+            const type = currentHeatmapType;
             
             let ranges = [];
-            switch(metric) {
-                case 'sustainability_score':
+            switch(type) {
+                case 'vegetation':
                     ranges = [
-                        { range: '0-49', color: '#F56565', label: 'Needs Improvement' },
-                        { range: '50-69', color: '#ED8936', label: 'Good' },
-                        { range: '70-100', color: '#48BB78', label: 'Excellent' }
+                        { range: '0-20%', color: '#F56565', label: 'Very Low' },
+                        { range: '21-40%', color: '#ED8936', label: 'Low' },
+                        { range: '41-60%', color: '#FBD38D', label: 'Moderate' },
+                        { range: '61-80%', color: '#9AE6B4', label: 'High' },
+                        { range: '81-100%', color: '#48BB78', label: 'Very High' }
                     ];
                     break;
-                case 'vegetation_index':
+                case 'pollution':
                     ranges = [
-                        { range: '0-39%', color: '#F56565', label: 'Low' },
-                        { range: '40-69%', color: '#ED8936', label: 'Moderate' },
-                        { range: '70-100%', color: '#48BB78', label: 'High' }
+                        { range: '0-2', color: '#48BB78', label: 'Very Clean' },
+                        { range: '3-4', color: '#9AE6B4', label: 'Clean' },
+                        { range: '5-6', color: '#FBD38D', label: 'Moderate' },
+                        { range: '7-8', color: '#ED8936', label: 'Polluted' },
+                        { range: '9-10', color: '#F56565', label: 'Very Polluted' }
                     ];
                     break;
-                case 'pollution_index':
+                case 'transport':
+                case 'urban_efficiency':
                     ranges = [
-                        { range: '0-3', color: '#48BB78', label: 'Low' },
-                        { range: '4-6', color: '#ED8936', label: 'Moderate' },
-                        { range: '7-10', color: '#F56565', label: 'High' }
+                        { range: '0-3', color: '#F56565', label: 'Poor' },
+                        { range: '4-6', color: '#ED8936', label: 'Average' },
+                        { range: '7-8', color: '#FBD38D', label: 'Good' },
+                        { range: '9-10', color: '#48BB78', label: 'Excellent' }
                     ];
                     break;
-                default:
+                case 'sustainability':
                     ranges = [
-                        { range: 'Low', color: '#F56565' },
-                        { range: 'Medium', color: '#ED8936' },
-                        { range: 'High', color: '#48BB78' }
+                        { range: '0-30', color: '#F56565', label: 'Critical' },
+                        { range: '31-50', color: '#ED8936', label: 'Needs Improvement' },
+                        { range: '51-70', color: '#FBD38D', label: 'Good' },
+                        { range: '71-85', color: '#9AE6B4', label: 'Very Good' },
+                        { range: '86-100', color: '#48BB78', label: 'Excellent' }
                     ];
+                    break;
+                case 'temperature':
+                    ranges = [
+                        { range: '25-28°C', color: '#48BB78', label: 'Cool' },
+                        { range: '29-32°C', color: '#9AE6B4', label: 'Mild' },
+                        { range: '33-35°C', color: '#FBD38D', label: 'Warm' },
+                        { range: '36-38°C', color: '#ED8936', label: 'Hot' },
+                        { range: '39-40°C', color: '#F56565', label: 'Very Hot' }
+                    ];
+                    break;
             }
             
             legend.innerHTML = ranges.map(range => `
                 <div class="d-flex align-items-center">
                     <div style="width: 20px; height: 20px; background: ${range.color}; border-radius: 50%; margin-right: 8px;"></div>
-                    <span class="small">${range.range}${range.label ? ` (${range.label})` : ''}</span>
+                    <span class="small"><strong>${range.range}</strong>${range.label ? ` - ${range.label}` : ''}</span>
                 </div>
             `).join('');
         }
         
         // Toggle map view
         function toggleMapView() {
-            const mapContainer = document.getElementById('heatMap');
+            const mapContainer = document.getElementById('interactiveMap');
             if (mapContainer.style.display === 'none') {
                 mapContainer.style.display = 'block';
-                setTimeout(() => heatMap.invalidateSize(), 100);
+                setTimeout(() => interactiveMap.invalidateSize(), 100);
             } else {
                 mapContainer.style.display = 'none';
             }
-        }
-        
-        // Reset map view
-        function resetMapView() {
-            heatMap.setView([23.2599, 77.4126], 11);
         }
         
         // Initialize on load

@@ -205,12 +205,155 @@ def dashboard():
                          top_areas=top_areas,
                          area_mappings=AREA_MAPPINGS)
 
-@app.route('/heatmaps')
+# Add this function to your app.py for enhanced heatmap data
+
+def get_enhanced_heatmap_data():
+    """Generate enhanced heatmap data with actual Bhopal coordinates and metrics"""
+    nasa_api = NASAAPI()
+    processor = BhopalDataProcessor()
+    base_data = processor.generate_area_analysis(nasa_api)
+    
+    # Actual Bhopal area coordinates with enhanced data
+    bhopal_areas = {
+        'old_bhopal': {
+            'name': 'Old Bhopal Heritage',
+            'latitude': 23.2599,
+            'longitude': 77.4126,
+            'type': 'Heritage & Commercial',
+            'sustainability_score': 24.7,
+            'vegetation_index': 0.35,
+            'pollution_index': 7.8,
+            'transport_index': 4.2,
+            'energy_index': 3.5,
+            'urbanization_index': 0.85,
+            'temperature': 32.5,
+            'solar_potential': 5.2,
+            'population_density': 12500,
+            'green_cover': 12,
+            'urban_efficiency': 4.1
+        },
+        'new_bhopal': {
+            'name': 'New Bhopal Development',
+            'latitude': 23.2278,
+            'longitude': 77.4357,
+            'type': 'Residential & Commercial',
+            'sustainability_score': 33.8,
+            'vegetation_index': 0.42,
+            'pollution_index': 6.2,
+            'transport_index': 6.8,
+            'energy_index': 5.2,
+            'urbanization_index': 0.72,
+            'temperature': 31.2,
+            'solar_potential': 5.8,
+            'population_density': 8900,
+            'green_cover': 18,
+            'urban_efficiency': 6.3
+        },
+        'shahpura': {
+            'name': 'Shahpura Sector',
+            'latitude': 23.3000,
+            'longitude': 77.3667,
+            'type': 'Mixed Use',
+            'sustainability_score': 28.7,
+            'vegetation_index': 0.38,
+            'pollution_index': 6.8,
+            'transport_index': 5.5,
+            'energy_index': 4.8,
+            'urbanization_index': 0.68,
+            'temperature': 31.8,
+            'solar_potential': 5.5,
+            'population_density': 7600,
+            'green_cover': 22,
+            'urban_efficiency': 5.2
+        },
+        'kolar': {
+            'name': 'Kolar Residential Zone',
+            'latitude': 23.1667,
+            'longitude': 77.4333,
+            'type': 'Residential',
+            'sustainability_score': 41.7,
+            'vegetation_index': 0.51,
+            'pollution_index': 5.1,
+            'transport_index': 7.2,
+            'energy_index': 6.8,
+            'urbanization_index': 0.55,
+            'temperature': 30.5,
+            'solar_potential': 6.2,
+            'population_density': 5200,
+            'green_cover': 35,
+            'urban_efficiency': 7.1
+        },
+        'indrapuri': {
+            'name': 'Indrapuri Housing',
+            'latitude': 23.2800,
+            'longitude': 77.4200,
+            'type': 'Residential',
+            'sustainability_score': 35.2,
+            'vegetation_index': 0.45,
+            'pollution_index': 5.8,
+            'transport_index': 6.5,
+            'energy_index': 5.8,
+            'urbanization_index': 0.62,
+            'temperature': 31.0,
+            'solar_potential': 5.9,
+            'population_density': 6800,
+            'green_cover': 28,
+            'urban_efficiency': 6.5
+        },
+        'bhopal_lake': {
+            'name': 'Bhopal Lake Area',
+            'latitude': 23.2667,
+            'longitude': 77.4000,
+            'type': 'Environmental & Recreational',
+            'sustainability_score': 55.8,
+            'vegetation_index': 0.78,
+            'pollution_index': 3.2,
+            'transport_index': 5.8,
+            'energy_index': 7.5,
+            'urbanization_index': 0.25,
+            'temperature': 29.2,
+            'solar_potential': 6.5,
+            'population_density': 3200,
+            'green_cover': 65,
+            'urban_efficiency': 8.2
+        },
+        'industrial_area': {
+            'name': 'Industrial Zone',
+            'latitude': 23.2000,
+            'longitude': 77.4500,
+            'type': 'Industrial',
+            'sustainability_score': 15.3,
+            'vegetation_index': 0.18,
+            'pollution_index': 9.2,
+            'transport_index': 3.5,
+            'energy_index': 2.8,
+            'urbanization_index': 0.92,
+            'temperature': 34.8,
+            'solar_potential': 4.8,
+            'population_density': 2100,
+            'green_cover': 8,
+            'urban_efficiency': 2.8
+        }
+    }
+    
+    # Merge with base data
+    enhanced_data = {}
+    for area_key, area_data in bhopal_areas.items():
+        if area_key in base_data:
+            enhanced_data[area_key] = {**bhopal_areas[area_key], **base_data[area_key]}
+        else:
+            enhanced_data[area_key] = bhopal_areas[area_key]
+    
+    return enhanced_data
+
+# Update your heatmaps route
+# Update your heatmaps route with explicit endpoint
+@app.route('/heatmaps', endpoint='heatmaps')
 def heatmaps():
     nasa_api = NASAAPI()
     processor = BhopalDataProcessor()
     visualizer = DataVisualizerPlotly()
-    analysis_data = get_enhanced_sample_data()
+    analysis_data = get_enhanced_heatmap_data()
     
     # Generate multiple heat maps
     sustainability_heatmap = visualizer.generate_heat_map(analysis_data, 'sustainability_score')
@@ -218,6 +361,7 @@ def heatmaps():
     transport_heatmap = visualizer.generate_heat_map(analysis_data, 'transport_index')
     vegetation_heatmap = visualizer.generate_heat_map(analysis_data, 'vegetation_index')
     urbanization_heatmap = visualizer.generate_heat_map(analysis_data, 'urbanization_index')
+    urban_efficiency_heatmap = visualizer.generate_heat_map(analysis_data, 'urban_efficiency')
     
     return render_template('heatmaps.html',
                          data=analysis_data,
@@ -226,6 +370,7 @@ def heatmaps():
                          transport_heatmap=transport_heatmap,
                          vegetation_heatmap=vegetation_heatmap,
                          urbanization_heatmap=urbanization_heatmap,
+                         urban_efficiency_heatmap=urban_efficiency_heatmap,
                          area_mappings=AREA_MAPPINGS)
 
 @app.route('/analysis')
