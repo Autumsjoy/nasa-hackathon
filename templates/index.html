@@ -187,39 +187,26 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark nav-custom fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
-                <i class="fas fa-city me-2"></i>
-                Bhopal Urban Planning
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('index') }}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('satellite') }}">Satellite Data</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('satellite_3d') }}">3D Maps</a>
-                    </li>
-                    <li class="nav-item">
-    <a class="nav-link" href="/heatmaps">Heat Maps</a>
-</li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <!-- In the navbar section of your index.html -->
+<div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('index') }}">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+        </li>
+       
+        <li class="nav-item">
+            <a class="nav-link" href="/heatmaps">Heat Maps</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('analysis_page') }}">Analysis</a>
+        </li>
+        <!-- Add this new Solutions link -->
+        <a class="nav-link" href="{{ url_for('solutions_overview') }}">Solutions</a>
+    </ul>
+</div>
 
     <!-- Hero Section -->
     <section class="hero-section">

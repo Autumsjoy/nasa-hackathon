@@ -267,6 +267,7 @@ class BhopalDataProcessor:
             'grid_dependency': energy_consumption.get('grid_electricity', 0)
         }
     
+
     def generate_area_analysis(self, nasa_api):
         analysis_results = {}
         

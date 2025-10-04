@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climate Resilience Solutions | NASA Hackathon 2025</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #50589C;
+            --success-color: #27AE60;
+            --warning-color: #E67E22;
+            --danger-color: #E74C3C;
+            --info-color: #3498DB;
+        }
+        
+        .resilience-header {
+            background: linear-gradient(135deg, #27AE60, #2ECC71);
+            color: white;
+            padding: 80px 0 40px;
+        }
+        
+        .strategy-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .strategy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .heat-resilience { border-left: 4px solid #E74C3C; }
+        .air-quality { border-left: 4px solid #3498DB; }
+        .water-management { border-left: 4px solid #2980B9; }
+        .green-infrastructure { border-left: 4px solid #27AE60; }
+        
+        .impact-badge {
+            background: linear-gradient(135deg, #FF6B35, #FF8C42);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .nasa-data-badge {
+            background: linear-gradient(135deg, #0b3d91, #1a6bc4);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}" style="color: var(--primary-color);">
+                <i class="fas fa-satellite me-2"></i>NASA Urban Planning
+            </a>
+            <div class="collapse navbar-collapse">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    <a class="nav-link" href="{{ url_for('solutions_overview') }}">Solutions Overview</a>
+                    <a class="nav-link active" href="{{ url_for('resilience_solutions') }}">Resilience</a>
+                    <a class="nav-link" href="{{ url_for('policy_solutions') }}">Policy</a>
+                    <a class="nav-link" href="{{ url_for('urban_planning_solutions') }}">Urban Planning</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="resilience-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold">Climate Resilience Solutions</h1>
+                    <p class="lead mb-0">Data-driven strategies to enhance urban resilience against climate impacts</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="card bg-white bg-opacity-10 text-white">
+                        <div class="card-body text-center">
+                            <h5 class="mb-2">NASA Data Sources</h5>
+                            <div class="h4 mb-0">5+</div>
+                            <small>Satellite Systems</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <!-- Climate Resilience Strategies -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="mb-4" style="color: var(--primary-color);">
+                    <i class="fas fa-shield-alt me-2"></i>Climate Resilience Strategies
+                </h2>
+                
+                {% if resilience_strategies %}
+                    {% for area_key, strategies in resilience_strategies.items() %}
+                    <div class="strategy-card {% if strategies.primary_threat == 'heat' %}heat-resilience{% elif strategies.primary_threat == 'air_quality' %}air-quality{% elif strategies.primary_threat == 'water' %}water-management{% else %}green-infrastructure{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h4 class="card-title" style="color: var(--primary-color);">
+                                    {{ strategies.area_name }}
+                                </h4>
+                                <div>
+                                    <span class="impact-badge me-2">{{ strategies.risk_level }} Risk</span>
+                                    <span class="badge bg-secondary">{{ strategies.priority }} Priority</span>
+                                </div>
+                            </div>
+                            
+                            <p class="text-muted mb-3">{{ strategies.primary_threat_description }}</p>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6>Primary Climate Threats:</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for threat in strategies.climate_threats %}
+                                        <span class="badge bg-danger">{{ threat }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>NASA Data Used:</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for data_source in strategies.nasa_data_sources %}
+                                        <span class="nasa-data-badge">{{ data_source }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h6>Resilience Actions:</h6>
+                            <div class="row">
+                                {% for action in strategies.resilience_actions %}
+                                <div class="col-lg-6 mb-2">
+                                    <div class="d-flex align-items-center p-2 bg-light rounded">
+                                        <i class="fas fa-check-circle text-success me-3"></i>
+                                        <span>{{ action }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <strong>Expected Impact:</strong> {{ strategies.expected_impact }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    No resilience strategies available for current data.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Implementation Framework -->
+        <div class="row">
+            <div class="col-12">
+                <div class="strategy-card green-infrastructure">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">
+                            <i class="fas fa-project-diagram me-2"></i>Resilience Implementation Framework
+                        </h4>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center p-3">
+                                    <div class="display-4 text-primary mb-2">1-6</div>
+                                    <h5>Months</h5>
+                                    <p class="text-muted">Quick Wins & Emergency Preparedness</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3">
+                                    <div class="display-4 text-warning mb-2">6-18</div>
+                                    <h5>Months</h5>
+                                    <p class="text-muted">Infrastructure Resilience & Policy</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3">
+                                    <div class="display-4 text-success mb-2">18+</div>
+                                    <h5>Months</h5>
+                                    <p class="text-muted">Long-term Climate Adaptation</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
