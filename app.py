@@ -793,5 +793,19 @@ def not_found(error):
 def internal_error(error):
     return render_template('500.html'), 500
 
+
+import psutil
+import gc
+
+def optimize_memory():
+    if os.environ.get('RENDER'):
+        gc.collect()
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000, threaded=True)
+    #  app.py (after all routes)
+    
+import os
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)

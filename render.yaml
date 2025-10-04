@@ -1,12 +1,17 @@
+# render.yaml - Corrected version
 services:
   - type: web
     name: nasa-urban-planner
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: gunicorn app:app
     envVars:
       - key: PORT
         value: 10000
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: MPLBACKEND
+        value: Agg
